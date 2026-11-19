@@ -333,8 +333,46 @@ header:not(.header-scrolled) .header-nav-contrast-dark:hover {
     color: rgba(24, 24, 27, 0.75) !important;
 }
 
+/* Contraste de cabecera transparente independiente para Modo Claro vs Modo Oscuro */
+html:not(.dark) header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light-mode-white,
+html:not(.dark) header:not(.header-scrolled) .header-nav-contrast-light-mode-white {
+    color: #ffffff !important;
+}
+html:not(.dark) header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light-mode-white:hover,
+html:not(.dark) header:not(.header-scrolled) .header-nav-contrast-light-mode-white:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+html:not(.dark) header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light-mode-dark,
+html:not(.dark) header:not(.header-scrolled) .header-nav-contrast-light-mode-dark {
+    color: #18181b !important;
+}
+html:not(.dark) header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light-mode-dark:hover,
+html:not(.dark) header:not(.header-scrolled) .header-nav-contrast-light-mode-dark:hover {
+    color: rgba(24, 24, 27, 0.75) !important;
+}
+
+html.dark header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark-mode-white,
+html.dark header:not(.header-scrolled) .header-nav-contrast-dark-mode-white {
+    color: #ffffff !important;
+}
+html.dark header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark-mode-white:hover,
+html.dark header:not(.header-scrolled) .header-nav-contrast-dark-mode-white:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+html.dark header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark-mode-dark,
+html.dark header:not(.header-scrolled) .header-nav-contrast-dark-mode-dark {
+    color: #18181b !important;
+}
+html.dark header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark-mode-dark:hover,
+html.dark header:not(.header-scrolled) .header-nav-contrast-dark-mode-dark:hover {
+    color: rgba(24, 24, 27, 0.75) !important;
+}
+
 /* ==========================================================================
    Soporte Responsivo Nativo para Imagen de Fondo de Sección (Móvil / Tablet / PC)
+   y Resolución SSR Instantánea Claro / Oscuro (Cero Parpadeo FOUC)
    ========================================================================== */
 .builder-bg-layer {
     background-image: var(--bg-url-mob, var(--bg-url-desk));
@@ -356,6 +394,31 @@ header:not(.header-scrolled) .header-nav-contrast-dark:hover {
         background-size: var(--bg-sz-desk, cover);
         background-position: var(--bg-pos-desk, center center);
     }
+}
+
+.builder-section-custom-bg {
+    background: var(--sec-bg-light, transparent);
+}
+
+html.dark .builder-section-custom-bg {
+    background: var(--sec-bg-dark, var(--sec-bg-light, transparent));
+}
+
+.builder-overlay-layer {
+    background: var(--sec-overlay-light, transparent);
+}
+
+html.dark .builder-overlay-layer {
+    background: var(--sec-overlay-dark, var(--sec-overlay-light, transparent));
+}
+
+/* Aislamiento de capas por tema anclado a <html> (evita descargas de red de imágenes en el modo inactivo) */
+html.dark .builder-media-only-light {
+    display: none !important;
+}
+
+html:not(.dark) .builder-media-only-dark {
+    display: none !important;
 }
 
 
@@ -456,6 +519,67 @@ h1, h2, h3, h4, h5, h6, .font-heading, .article-title, .builder-heading, .prose 
 .section-text-dark div:not(.p-button),
 .section-text-dark li,
 .section-text-dark label {
+    color: #18181b !important;
+}
+
+/* Color de texto forzado por sección de forma independiente en Modo Claro vs Modo Oscuro */
+html:not(.dark) .section-light-mode-text-light,
+html:not(.dark) .section-light-mode-text-light h1,
+html:not(.dark) .section-light-mode-text-light h2,
+html:not(.dark) .section-light-mode-text-light h3,
+html:not(.dark) .section-light-mode-text-light h4,
+html:not(.dark) .section-light-mode-text-light h5,
+html:not(.dark) .section-light-mode-text-light h6,
+html:not(.dark) .section-light-mode-text-light p,
+html:not(.dark) .section-light-mode-text-light span:not(.p-button-label):not(.pi),
+html:not(.dark) .section-light-mode-text-light div:not(.p-button),
+html:not(.dark) .section-light-mode-text-light li,
+html:not(.dark) .section-light-mode-text-light label {
+    color: #ffffff !important;
+}
+
+html:not(.dark) .section-light-mode-text-dark,
+html:not(.dark) .section-light-mode-text-dark h1,
+html:not(.dark) .section-light-mode-text-dark h2,
+html:not(.dark) .section-light-mode-text-dark h3,
+html:not(.dark) .section-light-mode-text-dark h4,
+html:not(.dark) .section-light-mode-text-dark h5,
+html:not(.dark) .section-light-mode-text-dark h6,
+html:not(.dark) .section-light-mode-text-dark p,
+html:not(.dark) .section-light-mode-text-dark span:not(.p-button-label):not(.pi),
+html:not(.dark) .section-light-mode-text-dark div:not(.p-button),
+html:not(.dark) .section-light-mode-text-dark li,
+html:not(.dark) .section-light-mode-text-dark label {
+    color: #18181b !important;
+}
+
+html.dark .section-dark-mode-text-light,
+html.dark .section-dark-mode-text-light h1,
+html.dark .section-dark-mode-text-light h2,
+html.dark .section-dark-mode-text-light h3,
+html.dark .section-dark-mode-text-light h4,
+html.dark .section-dark-mode-text-light h5,
+html.dark .section-dark-mode-text-light h6,
+html.dark .section-dark-mode-text-light p,
+html.dark .section-dark-mode-text-light span:not(.p-button-label):not(.pi),
+html.dark .section-dark-mode-text-light div:not(.p-button),
+html.dark .section-dark-mode-text-light li,
+html.dark .section-dark-mode-text-light label {
+    color: #ffffff !important;
+}
+
+html.dark .section-dark-mode-text-dark,
+html.dark .section-dark-mode-text-dark h1,
+html.dark .section-dark-mode-text-dark h2,
+html.dark .section-dark-mode-text-dark h3,
+html.dark .section-dark-mode-text-dark h4,
+html.dark .section-dark-mode-text-dark h5,
+html.dark .section-dark-mode-text-dark h6,
+html.dark .section-dark-mode-text-dark p,
+html.dark .section-dark-mode-text-dark span:not(.p-button-label):not(.pi),
+html.dark .section-dark-mode-text-dark div:not(.p-button),
+html.dark .section-dark-mode-text-dark li,
+html.dark .section-dark-mode-text-dark label {
     color: #18181b !important;
 }
 

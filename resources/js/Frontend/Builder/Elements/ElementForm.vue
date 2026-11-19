@@ -18,7 +18,7 @@
 import { computed, onMounted, onBeforeUnmount, ref, reactive, nextTick, watch, defineAsyncComponent } from 'vue';
 import axios from 'axios';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
-import { useSanitize } from '@/Composables/useSanitize';
+import { useSanitize, sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const PageBuilderRenderer = defineAsyncComponent(() => import('@/Frontend/Builder/PageBuilderRenderer.vue'));
 
@@ -617,7 +617,7 @@ const botonAlineacion = computed(() => {
 // ID personalizado y clases del inspector
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 // Anchura de campo según configuración
 function anchoClase(campo) {
@@ -648,7 +648,7 @@ function opcionesCampo(campo) {
         v-bind="animAttrs"
     >
         <!-- CSS personalizado del inspector -->
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <!-- Estado: Cargando esquema -->
         <div v-if="estado === 'loading'" class="p-8 flex flex-col items-center justify-center gap-3">

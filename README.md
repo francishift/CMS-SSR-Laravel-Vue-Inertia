@@ -35,7 +35,7 @@ Está diseñado para gestionar sitios web dinámicos, periódicos digitales o bl
 
 ### 🎨 2. Interfaz de Usuario y Sistema de Diseño (PrimeVue v4)
 - **Tema Personalizado Aura**: Paletas Tailwind tailoreadas con **Emerald (Esmeralda)** como color primario y **Zinc (Pizarra)** para superficies.
-- **Soporte Nativo de Modo Oscuro**: Detección automática y conmutación fluida sin parpadeos visuales (FOUC).
+- **Soporte Nativo de Modo Oscuro**: Detección automática, conmutación fluida sin parpadeos visuales (FOUC) y configuración independiente Claro / Oscuro para fondos multimedia, overlays y contrastes en secciones del Page Builder.
 - **Iconografía Vectorial**: Uso de **PrimeIcons (`pi pi-*`)** en todos los selectores, menús y tarjetas de contenido (cero emoticonos HTML).
 
 ### 🧩 3. Módulos y Funcionalidades del CMS
@@ -188,7 +188,7 @@ PASS  Tests\Feature\SecurityHeadersTest
 PASS  Tests\Feature\PublicResponseCacheTest
 PASS  Tests\Feature\SeoCanonicalAndDuplicateUrlsTest
 ...
-Tests:    242 passed (1179 assertions)
+Tests:    247 passed (1225 assertions)
 Duration: ~12s
 ```
 

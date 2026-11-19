@@ -86,9 +86,15 @@ Al guardar la estructura mediante Inertia (`form.put`), el servidor responde act
 
 ## 3. Estilos Visuales y Ajustes Avanzados de Sección (`BuilderSection.vue`)
 
-### 3.1. Gestión Unificada de Fondos y Especificidad CSS
+### 3.1. Gestión Unificada de Fondos, Modos Claro / Oscuro Independientes y Especificidad CSS
 - **Precedencia de Presets (`bg_preset`)**: Los presets visuales predefinidos (*Blanco Puro*, *Gris Suave*, *Zinc Oscuro*, *Esmeralda Suave*, *Gradiente Oscuro*, *Gradiente Esmeralda*) se aplican vía clases CSS sin ser anulados por estilos inline.
-- **Color Personalizado (`bg_color`)**: Aplica como `backgroundColor` inline únicamente cuando no hay preset o el preset es `'transparent'`. Incluye un botón de limpieza rápida en la interfaz para restablecer el color.
+- **Color y Gradiente Personalizado (`bg_color` / `bg_color_dark`)**: Cuando no hay preset o el preset es `'transparent'`, se resuelven mediante `.builder-section-custom-bg` con variables CSS `--sec-bg-light` y `--sec-bg-dark`, admitiendo tanto colores sólidos como gradientes CSS (`linear-gradient`, `radial-gradient`) sin destellos en SSR.
+- **Fondos Independientes Modo Claro / Modo Oscuro (`bg_dark_mode: 'inherit' | 'custom'`)**:
+  - En `SectionInspector.vue` el bloque *Estilos Visuales, Fondos y Capas* incorpora las pestañas **`Claro`** y **`Oscuro`**.
+  - **`inherit` *(Por defecto)***: Mantiene una única capa compartida para ambos temas con retrocompatibilidad del 100 %, podando automáticamente cualquier clave `*_dark` en el payload público mediante `PageBuilderResolverService::limpiarLayoutParaPublico()`.
+  - **`custom` *(Independiente en Modo Oscuro)***: Habilita campos propios para Modo Oscuro (`bg_type_dark`, `bg_image_dark`, `bg_image_mobile_dark`, `bg_size_dark`, `bg_position_dark`, `bg_size_tablet_dark`, `bg_position_tablet_dark`, `bg_size_mobile_dark`, `bg_position_mobile_dark`, `bg_attachment_dark`, `bg_repeat_dark`, `bg_blend_mode_dark`, `bg_filter_dark`, `bg_hide_mobile_dark`, `bg_video_dark`, `bg_video_poster_dark`, `bg_video_mobile_dark`, `bg_video_position_dark`, `bg_video_playback_rate_dark`, `bg_color_dark`, `bg_overlay_dark` y `text_color_dark`).
+  - **Aislamiento SSR Cero Parpadeo (`0 ms FOUC`) y Cero Descargas Ocultas**: Las clases `.builder-media-only-light` y `.builder-media-only-dark` en `resources/css/app.css` están ancladas a `html.dark` y `html:not(.dark)` con `display: none !important`, garantizando que desde el primer fotograma SSR el navegador solo pinte y descargue la imagen del tema activo. Los overlays conmutan instantáneamente mediante `--sec-overlay-light` y `--sec-overlay-dark` en `.builder-overlay-layer`.
+- **Sanitización de `custom_css` Compatible con SSR (`sanitizeInlineCss`)**: Todos los componentes estructurales y elementos del Builder inyectan las etiquetas `<style>` mediante `sanitizeInlineCss()` (`useSanitize.js`), preservando selectores CSS válidos como `>` o comillas en `@vue/server-renderer` (sin escaparlos a `&gt;` / `&quot;`) y bloqueando cierres `</style>` contra XSS.
 
 ### 3.2. Panel Avanzado de Imagen de Fondo Condicional (`v-if="bg_image"`)
 Para no saturar la interfaz, el subpanel de opciones avanzadas de imagen se muestra de forma condicional únicamente cuando la sección dispone de una ruta de imagen asignada:
@@ -115,17 +121,19 @@ Para no saturar la interfaz, el subpanel de opciones avanzadas de imagen se mues
   <link rel="preload" as="image" href="/media/render?...w=1920..." media="(min-width: 1024px)" fetchpriority="high">
   ```
   Esto garantiza que tanto en pruebas de Google Lighthouse / PageSpeed móvil como en dispositivos de escritorio reales, la solicitud pre-cargada coincida exactamente con la URL requerida por el CSS, satisfaciendo la auditoría de LCP Request Discovery al 100%.
+  - **Preload Inteligente por Tema (`bg_dark_mode === 'custom'`)**: Cuando la primera sección define fondos distintos para Modo Claro y Modo Oscuro y el sitio opera en modo `user_choice` con detección `system`, `BuilderSection.vue` califica cada `<link rel="preload">` con `(prefers-color-scheme: light)` o `(prefers-color-scheme: dark)` (y omite los preloads del tema opuesto si el sitio fuerza siempre `'light'` o `'dark'`), evitando descargas innecesarias en Googlebot y Lighthouse.
 
 ### 3.4. Cabecera Transparente Detrás de la Primera Sección (`transparent_header`)
 Permite situar la primera sección del diseño en `top: 0` (`y = 0`) para que la imagen o gradiente de fondo cubra todo el viewport, pasando por detrás del menú de navegación:
 - **`transparent_header: true`**: Activa la cabecera transparente flotante en la primera sección.
 - **`transparent_header_pull: true`**: Permite que el contenido interno de la sección comience desde arriba del todo. Si se desactiva (`false`), se aplica un padding compensatorio automático (`pt-16 sm:pt-20 lg:pt-24`) para que el contenido no quede tapado por los enlaces del menú mientras el fondo sí sube hasta el borde superior.
-- **Inyección Isomórfica Servidor / Cliente**: Configuración propagada vía middleware `HandleInertiaRequests` e inyectada jerárquicamente en `PublicLayout.vue` y `PublicHeader.vue` con soporte reactivo en tiempo real en el iframe del editor mediante `provide/inject`.
+- **Contraste Dual Claro / Oscuro (`transparent_header_nav_color` y `transparent_header_nav_color_dark`)**: Permite definir el contraste de enlaces y logotipo sobre cabecera transparente de forma conjunta o independiente entre Modo Claro y Modo Oscuro (`same`, `inherit`, `light`, `dark`), resolviéndose en SSR mediante clases CSS dedicadas sin esperar a JavaScript.
+- **Inyección Isomórfica Servidor / Cliente**: Configuración propagada vía middleware `HandleInertiaRequests` y `PublicPageController` e inyectada jerárquicamente en `PublicLayout.vue` y `PublicHeader.vue` con soporte reactivo en tiempo real en el iframe del editor mediante `provide/inject`.
 
 ### 3.5. Forzado Profundo de Color de Texto (`textColorClass`)
 Dado que las clases directas de Tailwind en componentes hijos (como `<h2 class="text-zinc-900">`) sobrescriben la herencia de fuente del elemento padre `<section>`, se han creado clases de anulación profunda en `resources/css/app.css`:
-- **`.section-text-light`**: Aplica `color: #ffffff !important` sobre todos los encabezados (`h1`-`h6`), párrafos (`p`), listas (`li`), etiquetas y divisores pertenecientes a la sección cuando se activa *"Claro (Forzar Texto Blanco)"*.
-- **`.section-text-dark`**: Aplica `color: #18181b !important` sobre todos los textos hijos cuando se activa *"Oscuro (Forzar Texto Negro)"*.
+- **`.section-text-light` / `.section-text-dark`**: Aplican `color: #ffffff !important` o `color: #18181b !important` cuando ambos modos comparten el mismo forzado.
+- **`.section-light-mode-text-*` / `.section-dark-mode-text-*`**: Acotadas a `html:not(.dark)` y `html.dark` cuando `text_color_dark` define un comportamiento distinto para Modo Oscuro.
 
 ### 3.6. Vídeo de Fondo en Secciones (`bg_type: 'video'`)
 Cualquier sección del Page Builder permite alternar entre una imagen panorámica y un vídeo de fondo HTML5 en bucle continuo, conservando el 100% de la configuración de estilos, overlays y colores:
@@ -175,6 +183,7 @@ Para resolver colisiones de estilos CSS, fallos en fondos fijos (`bg-fixed`), al
   - `CMS_BUILDER_UPDATE_LAYOUT`: Transfiere reactivamente en memoria el `layout_json` actualizado (< 1ms).
   - `CMS_BUILDER_SCROLL_TO`: Desplaza la vista previa hacia el elemento seleccionado en el árbol.
   - `CMS_BUILDER_REPLAY_ANIMATION`: Reproduce la animación del nodo activo.
+  - `CMS_BUILDER_SET_THEME` / `CMS_PREVIEW_THEME_CHANGED`: Sincroniza bidireccionalmente el Modo Claro / Modo Oscuro del lienzo aislado con el conmutador superior de `BuilderHeader.vue` y las pestañas Claro/Oscuro de `SectionInspector.vue`.
   - `CMS_BUILDER_SELECT_ELEMENT`: Permite hacer clic directamente en cualquier elemento del lienzo para seleccionarlo en el árbol de administración.
 - **Delegación de Eventos Interactivos en el Lienzo**: El escuchador de clics del iframe delega la selección del elemento hacia el editor padre pero permite que los componentes interactivos internos (como las miniaturas con lightbox de la galería, botones de acordeón FAQ y filtros de etiquetas) ejecuten su evento de clic con normalidad.
 - **Preservación del Árbol de Componentes**: El lienzo compara la estructura JSON recibida (`lastLayoutJson`) antes de forzar un re-render con `renderVersion++`, garantizando que la selección de un nodo no destruya el estado interno del componente ni cierre el visor interactivo.

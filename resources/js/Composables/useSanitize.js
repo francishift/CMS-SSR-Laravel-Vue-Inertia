@@ -164,6 +164,24 @@ const PURIFY_CONFIG = {
 };
 
 /**
+ * Sanitiza reglas CSS personalizadas para su inyección segura en etiquetas <style> tanto en SSR como en cliente,
+ * preservando selectores válidos (como '>' o comillas) y neutralizando cierres de etiqueta </style> o vectores XSS antiguos.
+ *
+ * @param {string} css
+ * @returns {string}
+ */
+export function sanitizeInlineCss(css) {
+    if (!css || typeof css !== 'string') return '';
+    return css
+        .replace(/<\/\s*style\s*>/gi, '')
+        .replace(/<\/\s*style/gi, '')
+        .replace(/<!--/g, '')
+        .replace(/-->/g, '')
+        .replace(/expression\s*\(/gi, 'noop(')
+        .replace(/javascript\s*:/gi, '');
+}
+
+/**
  * Composable que expone la función de sanitización.
  */
 export function useSanitize() {
@@ -181,5 +199,5 @@ export function useSanitize() {
         return DOMPurify.sanitize(procesado, PURIFY_CONFIG);
     }
 
-    return { sanitize, resolverShortcodes, normalizarEventosInlineHtml };
+    return { sanitize, sanitizeInlineCss, resolverShortcodes, normalizarEventosInlineHtml };
 }

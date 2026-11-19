@@ -7,6 +7,10 @@ Todos los cambios notables de **CMS SSR (Laravel + Vue + Inertia)** se documenta
 ## [Unreleased]
 
 ### Nuevas Funcionalidades y Mejoras de UI / UX
+- **Fondos, Medios, Overlays y Contrastes Independientes Modo Claro / Modo Oscuro en Secciones (`BuilderSection` & `SectionInspector`)**:
+  - Nuevas pestañas **`Claro` / `Oscuro`** en el bloque *Estilos Visuales, Fondos y Capas* del inspector de sección (`bg_dark_mode: 'inherit' | 'custom'`), permitiendo configurar de forma 100% independiente en Modo Oscuro imagen (PC/Tablet/Móvil), vídeo HTML5 + póster, color/gradiente personalizado, capa de superposición (`bg_overlay_dark`) y color de texto forzado (`text_color_dark`), además de contraste dual para menú en cabecera transparente (`transparent_header_nav_color_dark`).
+  - **Cero Parpadeo en SSR (`0 ms FOUC`) y Cero Descargas Innecesarias**: resolución puramente declarativa en CSS (`app.css`) anclada a `html:not(.dark)` y `html.dark` (`builder-media-only-light`, `builder-media-only-dark`, `--sec-bg-light/dark`, `--sec-overlay-light/dark`), combinada con `<link rel="preload" fetchpriority="high">` condicionado por `prefers-color-scheme` en la primera sección para proteger el LCP en Googlebot y PageSpeed.
+  - **Conmutador Claro / Oscuro en Vivo en el Maquetador**: nuevo botón rápido en `BuilderHeader` y sincronización automática del lienzo `BuilderPreviewFrame` (`CMS_BUILDER_SET_THEME` / `CMS_PREVIEW_THEME_CHANGED`) al alternar pestañas en el inspector, más poda automática de claves oscuras en `PageBuilderResolverService::limpiarLayoutParaPublico()` cuando la sección hereda el modo claro.
 - **Control de Tamaño del Logotipo en Escritorio y Móvil (`logo_height` y `logo_height_mobile`)**:
   - Nuevos deslizadores independientes en **Configuración → Identidad** (`16–100 px` escritorio y `16–64 px` móvil/cajón lateral) con previsualización en tiempo real para modo claro y oscuro.
   - Inyección crítica SSR (`--logo-height` y `--logo-height-mobile`) sin saltos de layout (`CLS = 0`), alturas mínimas elásticas (`min-h-*`) en las 4 disposiciones de `PublicHeader` y reducción proporcional automática en modo `shrink_on_scroll`.
@@ -14,9 +18,11 @@ Todos los cambios notables de **CMS SSR (Laravel + Vue + Inertia)** se documenta
   - Permite elegir en `Paginas/Create` y `Paginas/Edit` la escala tipográfica visual (`OPCIONES_TAMANO_VISUAL`) para páginas estáticas sin Page Builder (ej. *Política de privacidad* y *Política de cookies*), conservando el `<h1>` semántico para SEO.
 
 ### Correcciones y Seguridad CSP
+- **Renderizado SSR Íntegro y Seguro de `custom_css` en todo el Page Builder (`sanitizeInlineCss`)**:
+  - Sustituido `v-text` por `v-html` sanitizado con `sanitizeInlineCss()` (`useSanitize.js`) en los 14 componentes estructurales y modulares del Builder, evitando que `@vue/server-renderer` escape selectores CSS hijos (`>` -> `&gt;`) o comillas en el HTML SSR inicial y neutralizando cierres `</style>` contra inyección XSS.
 - **Sincronización Anti-FOUC de `frontend_default_theme` en `<head>` (`CspInlineScripts`)**:
   - Añadidas las variantes `PUBLIC_THEME_USER_CHOICE_LIGHT`, `PUBLIC_THEME_USER_CHOICE_DARK` y `PUBLIC_THEME_USER_CHOICE_SYSTEM` junto con `CspInlineScripts::publicThemeScript()` y sus hashes `SHA-256` en `publicHashes()`, eliminando cualquier destello de tema en primeras visitas tanto en páginas públicas como en `404.blade.php`.
-- **Suite de Pruebas**: ampliada a **242 pruebas automatizadas (1.179 aserciones)**.
+- **Suite de Pruebas**: ampliada a **247 pruebas automatizadas (1.225 aserciones)**.
 
 ---
 

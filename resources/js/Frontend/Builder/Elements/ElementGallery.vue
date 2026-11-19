@@ -17,6 +17,7 @@
 import ResponsiveImage from '@/Frontend/Components/ResponsiveImage.vue';
 import GalleryLightbox from '@/Frontend/Components/GalleryLightbox.vue';
 import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     content: { type: Object, default: () => ({}) },
@@ -89,7 +90,7 @@ const getItemAnimStyle = (idx) => {
 // --- Personalización avanzada ---
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.content?.custom_attributes;
@@ -649,7 +650,7 @@ function normalizeVideoSrc(src) {
         :style="blockAnimStyle"
         v-bind="{ ...blockAnimAttrs, ...parsedCustomAttributes }"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <!-- Barra de Filtro por Tags -->
         <nav

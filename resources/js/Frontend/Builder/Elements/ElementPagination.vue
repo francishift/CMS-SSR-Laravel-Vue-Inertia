@@ -11,6 +11,7 @@ import { computed, inject, ref, watch, nextTick } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
 import { desplazarSuaveConOffset } from '@/Composables/useScrollAnimation';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     content: { type: Object, default: () => ({}) },
@@ -24,7 +25,7 @@ const page = usePage();
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.content?.custom_attributes;
@@ -341,7 +342,7 @@ const marginBottomClass = computed(() => {
         :style="animStyle"
         v-bind="{ ...animAttrs, ...parsedCustomAttributes }"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <!-- ═══════════════════════════════════════════════════════════
              MODO 1: NAVEGACIÓN ENTRE ARTÍCULOS (ANTERIOR / SIGUIENTE)

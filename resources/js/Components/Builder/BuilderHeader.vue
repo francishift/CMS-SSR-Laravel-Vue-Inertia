@@ -25,6 +25,7 @@ const props = defineProps({
     descargaMuestraId: { type: [Number, String], default: null },
     vistaDispositivo: { type: String, required: true },
     vistaPanelMovil: { type: String, default: 'editor' },
+    temaPreview: { type: String, default: 'light' },
     tieneCambiosPendientes: { type: Boolean, default: false },
     formProcessing: { type: Boolean, default: false },
 });
@@ -32,6 +33,7 @@ const props = defineProps({
 const emit = defineEmits([
     'update:vistaDispositivo',
     'update:vistaPanelMovil',
+    'cambiar-tema-preview',
     'guardar',
     'cambiar-pagina',
     'cambiar-articulo-muestra',
@@ -350,6 +352,23 @@ const textoBotonWebPublica = computed(() => {
             >
                 <i class="pi pi-mobile text-xs" />
                 <span>Móvil</span>
+            </button>
+
+            <!-- Conmutador rápido de Tema en Previsualización (Modo Claro / Modo Oscuro) -->
+            <div class="h-4 w-px bg-zinc-200 dark:bg-zinc-700 mx-1" />
+            <button
+                type="button"
+                @click="emit('cambiar-tema-preview', temaPreview === 'dark' ? 'light' : 'dark')"
+                :class="[
+                    'px-2.5 py-1 text-xs rounded-lg font-semibold transition-all cursor-pointer flex items-center gap-1.5',
+                    temaPreview === 'dark'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-amber-100/90 text-amber-800 hover:bg-amber-200/80'
+                ]"
+                v-tooltip.bottom="temaPreview === 'dark' ? 'Lienzo en Modo Oscuro (clic para Claro)' : 'Lienzo en Modo Claro (clic para Oscuro)'"
+            >
+                <i :class="[temaPreview === 'dark' ? 'pi pi-moon' : 'pi pi-sun', 'text-xs']" />
+                <span>{{ temaPreview === 'dark' ? 'Oscuro' : 'Claro' }}</span>
             </button>
         </div>
 

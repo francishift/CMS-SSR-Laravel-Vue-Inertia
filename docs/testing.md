@@ -26,9 +26,9 @@ vendor/bin/phpunit
 
 ## 3. Cobertura y Métricas de Calidad
 
-- **Pruebas Totales**: 242
-- **Pruebas Pasadas**: 242 (100% Éxito)
-- **Aserciones Ejecutadas**: 1.179
+- **Pruebas Totales**: 247
+- **Pruebas Pasadas**: 247 (100% Éxito)
+- **Aserciones Ejecutadas**: 1.225
 - **Tiempo de Ejecución medio**: ~12 segundos
 
 ---
@@ -125,6 +125,11 @@ vendor/bin/phpunit
 ### 4.17 Escala Visual de Títulos en Páginas Básicas y Altura Dinámica de Logotipo (`Tests\Feature\PageTitleSizeTest` & `Tests\Feature\SiteSettingLogoHeightTest`)
 - **Tamaño Visual del `<h1>` en Páginas Estáticas (`title_size`)**: Valida el valor por defecto (`default`), la actualización y exposición en `PageResource` e Inertia (`Public/Page`) de escalas tipográficas (`h1`..`h6`, `hero_xl`, etc.) y el rechazo de escalas no permitidas.
 - **Altura del Logotipo en Escritorio y Móvil (`logo_height` y `logo_height_mobile`)**: Verifica persistencia en `SiteSetting`, validación de rangos (`16–120 px` escritorio y `16–80 px` móvil), exposición en `siteSettings` e inyección crítica SSR de `--logo-height` y `--logo-height-mobile` en `<head>`.
+
+### 4.18 Fondos Independientes Claro/Oscuro en Secciones y Renderizado CSS SSR (`Tests\Unit\Services\PageBuilderSectionDarkThemeCleanTest` & `Tests\Feature\SectionDualThemeBackgroundSsrTest`)
+- **Higiene de Payload Público (`limpiarLayoutParaPublico`)**: Verifica que cuando `bg_dark_mode` es `'inherit'`, se podan todas las claves exclusivas `*_dark` del JSON público, y que cuando es `'custom'` se preservan íntegramente.
+- **Persistencia y Cabecera Transparente Dual**: Valida el guardado de ajustes independientes Claro/Oscuro (`bg_image_dark`, `bg_overlay_dark`, `transparent_header_nav_color_dark`) y su exposición en `cabeceraTransparente` de Inertia, además de la sustitución de tokens dinámicos (`{category.featured_image}`) en `bg_image_dark`.
+- **Renderizado SSR Sin Parpadeo y Sanitización `<style>`**: Comprueba que el HTML SSR emita las capas aisladas `builder-media-only-dark`, variables `--sec-overlay-light/dark`, preloads LCP con `media="(prefers-color-scheme: dark)..."` y etiquetas `<style>` sin escapar selectores hijos `>` ni permitir cierres `</style>`.
 
 
 

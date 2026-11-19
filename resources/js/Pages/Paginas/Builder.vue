@@ -209,6 +209,24 @@ const handleReplayAnimation = (e) => {
     });
 };
 
+// Estado y conmutador en vivo del tema del lienzo (Modo Claro / Modo Oscuro)
+const temaPreview = ref('light');
+
+const cambiarTemaPreview = (nuevoTema) => {
+    const tema = nuevoTema === 'dark' ? 'dark' : 'light';
+    temaPreview.value = tema;
+    sendToIframe({
+        type: 'CMS_BUILDER_SET_THEME',
+        theme: tema,
+    });
+};
+
+const handlePreviewThemeEvent = (e) => {
+    if (e?.detail?.theme) {
+        cambiarTemaPreview(e.detail.theme);
+    }
+};
+
 /**
  * Normaliza cualquier URL absoluta o relativa a su ruta interna limpia (`/ruta` sin barra final).
  */
@@ -502,12 +520,19 @@ const handleWindowMessage = (event) => {
 
     if (event.data.type === 'CMS_BUILDER_FRAME_READY') {
         iframeReady.value = true;
+        if (event.data.theme === 'dark' || event.data.theme === 'light') {
+            temaPreview.value = event.data.theme;
+        }
         // Enviar de inmediato el layout actual al iframe recién montado
         sendToIframe({
             type: 'CMS_BUILDER_UPDATE_LAYOUT',
             layout: JSON.parse(JSON.stringify(layout.value)),
             selectedId: elementoSeleccionado.value?.id,
         });
+    } else if (event.data.type === 'CMS_PREVIEW_THEME_CHANGED') {
+        if (event.data.theme === 'dark' || event.data.theme === 'light') {
+            temaPreview.value = event.data.theme;
+        }
     } else if (event.data.type === 'CMS_BUILDER_SELECT_ELEMENT') {
         const id = event.data.id;
         if (id) {
@@ -624,6 +649,7 @@ onMounted(() => {
     window.addEventListener('message', handleWindowMessage);
     if (typeof window !== 'undefined') {
         window.addEventListener('cms-replay-animation', handleReplayAnimation);
+        window.addEventListener('cms-builder-preview-theme', handlePreviewThemeEvent);
     }
 });
 
@@ -631,6 +657,7 @@ onUnmounted(() => {
     window.removeEventListener('message', handleWindowMessage);
     if (typeof window !== 'undefined') {
         window.removeEventListener('cms-replay-animation', handleReplayAnimation);
+        window.removeEventListener('cms-builder-preview-theme', handlePreviewThemeEvent);
     }
 });
 </script>
@@ -654,8 +681,10 @@ onUnmounted(() => {
             :descargaMuestraId="descargaMuestraActiva?.id"
             v-model:vistaDispositivo="vistaDispositivo"
             v-model:vistaPanelMovil="vistaPanelMovil"
+            :temaPreview="temaPreview"
             :tieneCambiosPendientes="tieneCambiosPendientes"
             :formProcessing="form.processing"
+            @cambiar-tema-preview="cambiarTemaPreview"
             @guardar="guardarBuilder"
             @cambiar-pagina="onCambiarPaginaId"
             @cambiar-articulo-muestra="onCambiarArticuloMuestra"

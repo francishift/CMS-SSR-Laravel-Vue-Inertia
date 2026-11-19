@@ -7,7 +7,7 @@
  */
 import { computed, inject, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useSanitize } from '@/Composables/useSanitize';
+import { useSanitize, sanitizeInlineCss } from '@/Composables/useSanitize';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
 
 const { sanitize } = useSanitize();
@@ -25,7 +25,7 @@ const vistaDispositivo = inject('vistaDispositivo', ref(null));
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.content?.custom_attributes;
@@ -166,7 +166,7 @@ const isSubtitleSpaLink = computed(() => {
         :style="animStyle"
         v-bind="{ ...animAttrs, ...parsedCustomAttributes }"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <!-- Subtítulo superior -->
         <span

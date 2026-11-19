@@ -27,6 +27,7 @@ import ElementMap from '../Elements/ElementMap.vue';
 import ElementForm from '../Elements/ElementForm.vue';
 import { computed, inject, provide, ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { calculateColumnLayoutClasses } from '@/Config/gridPresets';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     column: { type: Object, required: true },
@@ -432,7 +433,7 @@ watch(
             <div v-if="overlayClass" :class="['absolute inset-0 z-0 pointer-events-none', overlayClass]" />
 
             <!-- Estilos CSS personalizados si existen -->
-            <component :is="'style'" v-if="column.custom_css" v-text="column.custom_css" />
+            <component :is="'style'" v-if="column.custom_css" v-html="sanitizeInlineCss(column.custom_css)" />
 
             <div :class="['w-full space-y-4 relative z-10', wrapperAlignClass]">
                 <template v-for="element in column.elements || []" :key="element.id">

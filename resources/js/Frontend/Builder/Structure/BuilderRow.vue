@@ -8,6 +8,7 @@
 import BuilderColumn from './BuilderColumn.vue';
 import { computed, inject, ref } from 'vue';
 import { filtrarColumnasVisibles, calcularLayoutEfectivo } from '@/Composables/useColumnCollapse';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     row: { type: Object, required: true },
@@ -53,7 +54,7 @@ const rowContainerClass = computed(() => {
 // Personalización avanzada de código
 const customId = computed(() => props.row?.element_id || props.row?.settings?.element_id || undefined);
 const customClasses = computed(() => props.row?.custom_classes || props.row?.settings?.custom_classes || '');
-const customCss = computed(() => props.row?.custom_css || props.row?.settings?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.row?.custom_css || props.row?.settings?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.row?.custom_attributes || props.row?.settings?.custom_attributes;
@@ -181,7 +182,7 @@ const layoutEfectivo = computed(() => {
         :class="['flow-root', rowContainerClass, marginTopClass, marginBottomClass, customClasses]"
         v-bind="parsedCustomAttributes"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <div v-if="columnasVisibles.length" :class="['flex flex-wrap', rowGutterClass, alignClass]">
             <BuilderColumn

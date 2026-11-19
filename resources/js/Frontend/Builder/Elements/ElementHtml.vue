@@ -7,7 +7,7 @@
 import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
 
-import { resolverShortcodes, normalizarEventosInlineHtml } from '@/Composables/useSanitize';
+import { resolverShortcodes, normalizarEventosInlineHtml, sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     content: { type: Object, default: () => ({}) },
@@ -25,7 +25,7 @@ const htmlCode = computed(() => {
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 // Alineación horizontal
 const alignClass = computed(() => {
@@ -91,7 +91,7 @@ watch(htmlCode, () => {
         :style="animStyle"
         v-bind="animAttrs"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
         <div class="w-full" v-html="htmlCode" />
     </div>
 </template>

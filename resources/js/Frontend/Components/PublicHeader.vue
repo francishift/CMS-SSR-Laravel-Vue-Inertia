@@ -112,20 +112,55 @@ const isTransparentSectionActive = computed(() => {
     return Boolean(props.transparentOverride?.active || page.props?.cabeceraTransparente?.active);
 });
 
+const navColorLightConfig = computed(() => {
+    return props.transparentOverride?.navColor || page.props?.cabeceraTransparente?.navColor || 'inherit';
+});
+
+const navColorDarkConfig = computed(() => {
+    const rawDark = props.transparentOverride?.navColorDark || page.props?.cabeceraTransparente?.navColorDark || 'same';
+    return (!rawDark || rawDark === 'same') ? navColorLightConfig.value : rawDark;
+});
+
 const navContrastClass = computed(() => {
     if (!isTransparentSectionActive.value || isScrolled.value) return '';
-    const color = props.transparentOverride?.navColor || page.props?.cabeceraTransparente?.navColor;
-    if (color === 'light') return 'header-nav-contrast-light !text-white hover:!text-white/80 active:!text-white';
-    if (color === 'dark') return 'header-nav-contrast-dark !text-zinc-900 hover:!text-zinc-700 active:!text-zinc-900';
-    return '';
+    const colorLight = navColorLightConfig.value;
+    const colorDark = navColorDarkConfig.value;
+
+    if (colorLight === colorDark) {
+        if (colorLight === 'light') return 'header-nav-contrast-light !text-white hover:!text-white/80 active:!text-white';
+        if (colorLight === 'dark') return 'header-nav-contrast-dark !text-zinc-900 hover:!text-zinc-700 active:!text-zinc-900';
+        return '';
+    }
+
+    const classes = [];
+    if (colorLight === 'light') classes.push('header-nav-contrast-light-mode-white');
+    else if (colorLight === 'dark') classes.push('header-nav-contrast-light-mode-dark');
+
+    if (colorDark === 'light') classes.push('header-nav-contrast-dark-mode-white');
+    else if (colorDark === 'dark') classes.push('header-nav-contrast-dark-mode-dark');
+
+    return classes.join(' ');
 });
 
 const navContrastButtonClass = computed(() => {
     if (!isTransparentSectionActive.value || isScrolled.value) return '';
-    const color = props.transparentOverride?.navColor || page.props?.cabeceraTransparente?.navColor;
-    if (color === 'light') return '!text-white hover:!bg-white/10';
-    if (color === 'dark') return '!text-zinc-900 hover:!bg-black/5';
-    return '';
+    const colorLight = navColorLightConfig.value;
+    const colorDark = navColorDarkConfig.value;
+
+    if (colorLight === colorDark) {
+        if (colorLight === 'light') return '!text-white hover:!bg-white/10';
+        if (colorLight === 'dark') return '!text-zinc-900 hover:!bg-black/5';
+        return '';
+    }
+
+    const classes = [];
+    if (colorLight === 'light') classes.push('header-nav-contrast-light-mode-white hover:bg-white/10');
+    else if (colorLight === 'dark') classes.push('header-nav-contrast-light-mode-dark hover:bg-black/5');
+
+    if (colorDark === 'light') classes.push('header-nav-contrast-dark-mode-white dark:hover:bg-white/10');
+    else if (colorDark === 'dark') classes.push('header-nav-contrast-dark-mode-dark dark:hover:bg-black/5');
+
+    return classes.join(' ');
 });
 
 const permiteEleccionUsuario = computed(() => props.settings.frontend_theme_mode === 'user_choice');
@@ -217,10 +252,11 @@ function getRel(item, isExternal = false) {
 
 const logoActualSrc = computed(() => {
     if (isTransparentSectionActive.value && !isScrolled.value) {
-        if (props.transparentOverride?.navColor === 'light') {
+        const activeNavContrast = esModoOscuroActivo.value ? navColorDarkConfig.value : navColorLightConfig.value;
+        if (activeNavContrast === 'light') {
             return props.settings.logo_dark_path || props.settings.logo_path;
         }
-        if (props.transparentOverride?.navColor === 'dark') {
+        if (activeNavContrast === 'dark') {
             return props.settings.logo_path || props.settings.logo_dark_path;
         }
     }

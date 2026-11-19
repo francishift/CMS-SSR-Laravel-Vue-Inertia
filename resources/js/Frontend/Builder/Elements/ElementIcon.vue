@@ -14,6 +14,7 @@ import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { esNavegacionInertia } from '@/Composables/useUrlHelpers';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     content: { type: Object, default: () => ({}) },
@@ -25,7 +26,7 @@ const { animAttrs, animStyle } = useElementAnimation(props);
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.content?.custom_attributes;
@@ -285,7 +286,7 @@ const gapClass = computed(() => {
         :style="animStyle"
         v-bind="{ ...animAttrs, ...parsedCustomAttributes }"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <!-- Enlace Interno SPA con <Link> de Inertia -->
         <Link

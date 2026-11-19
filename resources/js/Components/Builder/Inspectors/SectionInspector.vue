@@ -35,6 +35,34 @@ const props = defineProps({
 
 const dispositivoEspaciado = ref('desktop');
 const dispositivoFondo = ref('desktop');
+const dispositivoFondoDark = ref('desktop');
+const temaFondo = ref('light');
+
+function seleccionarTemaFondo(tema) {
+    temaFondo.value = tema;
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cms-builder-preview-theme', { detail: { theme: tema } }));
+    }
+}
+
+const opcionesModoFondoOscuro = [
+    { label: 'Heredar fondo de Modo Claro (Por defecto)', value: 'inherit' },
+    { label: 'Configuración independiente en Modo Oscuro', value: 'custom' },
+];
+
+const opcionesColorTextoDark = [
+    { label: 'Mismo ajuste que Modo Claro', value: 'same' },
+    { label: 'Heredar del tema oscuro (Automático)', value: 'inherit' },
+    { label: 'Texto Claro Forzado (Blanco)', value: 'light' },
+    { label: 'Texto Oscuro Forzado (Negro)', value: 'dark' },
+];
+
+const opcionesContrasteCabeceraDark = [
+    { label: 'Mismo ajuste que Modo Claro', value: 'same' },
+    { label: 'Heredar colores del tema oscuro', value: 'inherit' },
+    { label: 'Texto Claro / Blanco (Sobre fondos oscuros)', value: 'light' },
+    { label: 'Texto Oscuro / Negro (Sobre fondos claros)', value: 'dark' },
+];
 
 const opcionesBgSizeCompleto = [
     { label: 'Cover (Cubrir toda la sección)', value: 'cover' },
@@ -415,6 +443,267 @@ const transparentHeaderNavColorModel = computed({
         }
     }
 });
+
+const transparentHeaderNavColorDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.transparent_header_nav_color_dark;
+        if (!val || val === '') return 'same';
+        return val;
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.transparent_header_nav_color_dark = val;
+        }
+    }
+});
+
+// ─── Modelos Computados Independientes para Fondo en Modo Oscuro (Regla PrimeVue 4: sin cadenas vacías) ───
+const bgDarkModeModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_dark_mode;
+        return val === 'custom' ? 'custom' : 'inherit';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_dark_mode = val === 'custom' ? 'custom' : 'inherit';
+        }
+    }
+});
+
+const bgTypeDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_type_dark || 'image';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_type_dark = val;
+        }
+    }
+});
+
+const bgSizeDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_size_dark || 'cover';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_size_dark = val;
+        }
+    }
+});
+
+const bgPositionDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_position_dark || 'center center';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_position_dark = val;
+        }
+    }
+});
+
+const bgSizeTabletDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_size_tablet_dark;
+        return (val && val !== '') ? val : 'inherit';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_size_tablet_dark = (val === 'inherit') ? '' : val;
+        }
+    }
+});
+
+const bgPositionTabletDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_position_tablet_dark;
+        return (val && val !== '') ? val : 'inherit';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_position_tablet_dark = (val === 'inherit') ? '' : val;
+        }
+    }
+});
+
+const bgSizeMobileDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_size_mobile_dark;
+        return (val && val !== '') ? val : 'inherit';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_size_mobile_dark = (val === 'inherit') ? '' : val;
+        }
+    }
+});
+
+const bgPositionMobileDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_position_mobile_dark;
+        return (val && val !== '') ? val : 'inherit';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_position_mobile_dark = (val === 'inherit') ? '' : val;
+        }
+    }
+});
+
+const bgAttachmentDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_attachment_dark || 'scroll';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_attachment_dark = val;
+        }
+    }
+});
+
+const bgRepeatDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_repeat_dark || 'no-repeat';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_repeat_dark = val;
+        }
+    }
+});
+
+const bgBlendModeDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_blend_mode_dark || 'normal';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_blend_mode_dark = val;
+        }
+    }
+});
+
+const bgFilterDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_filter_dark || 'none';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_filter_dark = val;
+        }
+    }
+});
+
+const bgHideMobileDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_hide_mobile_dark || 'none';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_hide_mobile_dark = val;
+        }
+    }
+});
+
+const bgVideoPositionDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_video_position_dark || 'center center';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_video_position_dark = val;
+        }
+    }
+});
+
+const bgVideoMobileDarkModel = computed({
+    get() {
+        return props.elementoSeleccionado?.settings?.bg_video_mobile_dark || 'fallback';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_video_mobile_dark = val;
+        }
+    }
+});
+
+const bgVideoPlaybackRateDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_video_playback_rate_dark;
+        return val ? String(val) : '1.0';
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_video_playback_rate_dark = Number(val);
+        }
+    }
+});
+
+const customBgColorDarkPickerModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.bg_color_dark;
+        if (!val || typeof val !== 'string' || !val.startsWith('#')) return '#09090b';
+        return val;
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.bg_color_dark = val;
+        }
+    }
+});
+
+const textColorDarkModel = computed({
+    get() {
+        const val = props.elementoSeleccionado?.settings?.text_color_dark;
+        if (!val || val === '') return 'same';
+        return val;
+    },
+    set(val) {
+        if (props.elementoSeleccionado?.settings) {
+            props.elementoSeleccionado.settings.text_color_dark = val;
+        }
+    }
+});
+
+function activarModoOscuroLimpio() {
+    const s = props.elementoSeleccionado?.settings;
+    if (!s) return;
+    s.bg_dark_mode = 'custom';
+    if (s.bg_type_dark === undefined) s.bg_type_dark = 'image';
+    if (s.bg_image_dark === undefined) s.bg_image_dark = '';
+    if (s.bg_color_dark === undefined) s.bg_color_dark = '';
+    if (s.bg_overlay_dark === undefined) s.bg_overlay_dark = '';
+    seleccionarTemaFondo('dark');
+}
+
+function copiarFondoClaroAOscuro() {
+    const s = props.elementoSeleccionado?.settings;
+    if (!s) return;
+    s.bg_dark_mode = 'custom';
+    s.bg_type_dark = s.bg_type || 'image';
+    s.bg_image_dark = s.bg_image || '';
+    s.bg_image_mobile_dark = s.bg_image_mobile || '';
+    s.bg_size_dark = s.bg_size || 'cover';
+    s.bg_position_dark = s.bg_position || 'center center';
+    s.bg_size_tablet_dark = s.bg_size_tablet || '';
+    s.bg_position_tablet_dark = s.bg_position_tablet || '';
+    s.bg_size_mobile_dark = s.bg_size_mobile || '';
+    s.bg_position_mobile_dark = s.bg_position_mobile || '';
+    s.bg_attachment_dark = s.bg_attachment || 'scroll';
+    s.bg_repeat_dark = s.bg_repeat || 'no-repeat';
+    s.bg_blend_mode_dark = s.bg_blend_mode || 'normal';
+    s.bg_filter_dark = s.bg_filter || 'none';
+    s.bg_hide_mobile_dark = s.bg_hide_mobile || 'none';
+    s.bg_video_dark = s.bg_video || '';
+    s.bg_video_poster_dark = s.bg_video_poster || '';
+    s.bg_video_mobile_dark = s.bg_video_mobile || 'fallback';
+    s.bg_video_position_dark = s.bg_video_position || 'center center';
+    s.bg_video_playback_rate_dark = s.bg_video_playback_rate || 1;
+    s.bg_color_dark = s.bg_color || '';
+    s.bg_overlay_dark = s.bg_overlay || '';
+    seleccionarTemaFondo('dark');
+}
 </script>
 
 <template>
@@ -472,11 +761,50 @@ const transparentHeaderNavColorModel = computed({
             </div>
         </div>
 
-        <!-- BLOQUE 2: FONDOS, COLORES Y OVERLAYS -->
+        <!-- BLOQUE 2: FONDOS, COLORES Y OVERLAYS (CON SOPORTE INDEPENDIENTE MODO CLARO / OSCURO) -->
         <div class="p-3.5 bg-zinc-50 dark:bg-zinc-900/60 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-3.5">
-            <div class="flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                <i class="pi pi-palette text-emerald-600 dark:text-emerald-400" />
-                <span>Estilos Visuales, Fondos y Capas</span>
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    <i class="pi pi-palette text-emerald-600 dark:text-emerald-400" />
+                    <span>Estilos Visuales, Fondos y Capas</span>
+                </div>
+
+                <!-- Conmutador de Tema de Fondo (Modo Claro / Modo Oscuro) -->
+                <div class="flex items-center bg-zinc-200/80 dark:bg-zinc-800 p-0.5 rounded-lg text-[10px] shrink-0">
+                    <button
+                        type="button"
+                        @click="seleccionarTemaFondo('light')"
+                        :class="[
+                            'px-2 py-1 rounded-md flex items-center gap-1 font-semibold transition-all cursor-pointer',
+                            temaFondo === 'light'
+                                ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-xs'
+                                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                        ]"
+                        v-tooltip.top="'Editar fondo para Modo Claro'"
+                    >
+                        <i class="pi pi-sun text-[10px]" />
+                        <span>Claro</span>
+                    </button>
+                    <button
+                        type="button"
+                        @click="seleccionarTemaFondo('dark')"
+                        :class="[
+                            'px-2 py-1 rounded-md flex items-center gap-1 font-semibold transition-all cursor-pointer',
+                            temaFondo === 'dark'
+                                ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                        ]"
+                        v-tooltip.top="'Editar fondo independiente para Modo Oscuro'"
+                    >
+                        <i class="pi pi-moon text-[10px]" />
+                        <span>Oscuro</span>
+                        <span
+                            v-if="bgDarkModeModel === 'custom'"
+                            class="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                            title="Fondo personalizado activo en Modo Oscuro"
+                        />
+                    </button>
+                </div>
             </div>
 
             <div>
@@ -490,40 +818,54 @@ const transparentHeaderNavColorModel = computed({
                 />
             </div>
 
-            <!-- Selector de Tipo de Fondo Multimedia: Imagen o Vídeo -->
-            <div>
-                <label class="block text-xs font-semibold mb-1.5">Medio de Fondo</label>
-                <div class="grid grid-cols-2 gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80">
-                    <button
-                        type="button"
-                        @click="bgTypeModel = 'image'"
-                        :class="[
-                            'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
-                            bgTypeModel === 'image'
-                                ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
-                                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                        ]"
-                    >
-                        <i class="pi pi-image text-xs" />
-                        <span>Imagen</span>
-                    </button>
-                    <button
-                        type="button"
-                        @click="bgTypeModel = 'video'"
-                        :class="[
-                            'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
-                            bgTypeModel === 'video'
-                                ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
-                                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                        ]"
-                    >
-                        <i class="pi pi-video text-xs" />
-                        <span>Vídeo</span>
-                    </button>
+            <!-- ═══════════════════════════════════════════════════════════════════════════
+                 PESTAÑA 1: CONFIGURACIÓN DE FONDO EN MODO CLARO (O BASE COMPARTIDA)
+                 ═══════════════════════════════════════════════════════════════════════════ -->
+            <template v-if="temaFondo === 'light'">
+                <div class="px-2.5 py-1.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/50 text-[10.5px] text-amber-800 dark:text-amber-200 flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-1.5 font-semibold">
+                        <i class="pi pi-sun text-[11px]" />
+                        <span>Editando: <strong>Modo Claro</strong></span>
+                    </span>
+                    <span class="text-[9.5px] opacity-80">
+                        {{ bgDarkModeModel === 'custom' ? 'Modo Oscuro independiente activo' : 'Compartido con Modo Oscuro' }}
+                    </span>
                 </div>
-            </div>
 
-            <!-- ═══ MODO 1: IMAGEN DE FONDO ═══ -->
+                <!-- Selector de Tipo de Fondo Multimedia: Imagen o Vídeo -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Medio de Fondo</label>
+                    <div class="grid grid-cols-2 gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80">
+                        <button
+                            type="button"
+                            @click="bgTypeModel = 'image'"
+                            :class="[
+                                'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
+                                bgTypeModel === 'image'
+                                    ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                            ]"
+                        >
+                            <i class="pi pi-image text-xs" />
+                            <span>Imagen</span>
+                        </button>
+                        <button
+                            type="button"
+                            @click="bgTypeModel = 'video'"
+                            :class="[
+                                'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
+                                bgTypeModel === 'video'
+                                    ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                            ]"
+                        >
+                            <i class="pi pi-video text-xs" />
+                            <span>Vídeo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ═══ MODO 1: IMAGEN DE FONDO (CLARO) ═══ -->
             <template v-if="bgTypeModel === 'image'">
                 <div>
                     <label class="block text-xs font-semibold mb-1.5">Imagen de Fondo de Sección</label>
@@ -869,16 +1211,438 @@ const transparentHeaderNavColorModel = computed({
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold mb-1.5">Color de Texto Forzado</label>
-                <Select
-                    v-model="textColorModel"
-                    :options="opcionesColorTexto"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full text-xs"
-                />
-            </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Color de Texto Forzado (Modo Claro)</label>
+                    <Select
+                        v-model="textColorModel"
+                        :options="opcionesColorTexto"
+                        optionLabel="label"
+                        optionValue="value"
+                        class="w-full text-xs"
+                    />
+                </div>
+            </template>
+
+            <!-- ═══════════════════════════════════════════════════════════════════════════
+                 PESTAÑA 2: CONFIGURACIÓN INDEPENDIENTE DE FONDO EN MODO OSCURO
+                 ═══════════════════════════════════════════════════════════════════════════ -->
+            <template v-else>
+                <div class="px-2.5 py-1.5 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/50 text-[10.5px] text-indigo-800 dark:text-indigo-200 flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-1.5 font-semibold">
+                        <i class="pi pi-moon text-[11px]" />
+                        <span>Editando: <strong>Modo Oscuro</strong></span>
+                    </span>
+                    <span class="text-[9.5px] opacity-80">SSR nativo sin parpadeo</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Comportamiento en Modo Oscuro</label>
+                    <Select
+                        v-model="bgDarkModeModel"
+                        :options="opcionesModoFondoOscuro"
+                        optionLabel="label"
+                        optionValue="value"
+                        class="w-full text-xs"
+                    />
+                </div>
+
+                <!-- Estado heredado por defecto -->
+                <div
+                    v-if="bgDarkModeModel === 'inherit'"
+                    class="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2.5"
+                >
+                    <p class="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        Esta sección reutiliza actualmente el mismo fondo, imagen/vídeo y capa de superposición configurados en <strong>Modo Claro</strong>.
+                    </p>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button
+                            type="button"
+                            @click="activarModoOscuroLimpio"
+                            class="w-full py-1.5 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                            <i class="pi pi-moon text-[10px]" />
+                            <span>Crear fondo exclusivo para Modo Oscuro</span>
+                        </button>
+                        <button
+                            v-if="elementoSeleccionado.settings.bg_image || elementoSeleccionado.settings.bg_video || elementoSeleccionado.settings.bg_overlay || elementoSeleccionado.settings.bg_color"
+                            type="button"
+                            @click="copiarFondoClaroAOscuro"
+                            class="w-full py-1.5 px-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                            <i class="pi pi-copy text-[10px]" />
+                            <span>Copiar ajustes de Modo Claro para adaptar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Campos independientes activos para Modo Oscuro -->
+                <template v-else>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5">Medio de Fondo (Modo Oscuro)</label>
+                        <div class="grid grid-cols-2 gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80">
+                            <button
+                                type="button"
+                                @click="bgTypeDarkModel = 'image'"
+                                :class="[
+                                    'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
+                                    bgTypeDarkModel === 'image'
+                                        ? 'bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                                ]"
+                            >
+                                <i class="pi pi-image text-xs" />
+                                <span>Imagen</span>
+                            </button>
+                            <button
+                                type="button"
+                                @click="bgTypeDarkModel = 'video'"
+                                :class="[
+                                    'py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer',
+                                    bgTypeDarkModel === 'video'
+                                        ? 'bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                                ]"
+                            >
+                                <i class="pi pi-video text-xs" />
+                                <span>Vídeo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MODO 1 (OSCURO): IMAGEN DE FONDO -->
+                    <template v-if="bgTypeDarkModel === 'image'">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1.5">Imagen de Fondo (Modo Oscuro)</label>
+                            <ImageUploader
+                                :modelValue="elementoSeleccionado.settings.bg_image_dark || ''"
+                                @update:modelValue="(val) => elementoSeleccionado.settings.bg_image_dark = val"
+                                directorio="fondos"
+                                ayuda="Se carga y renderiza únicamente en Modo Oscuro (cero impacto en Modo Claro)."
+                            />
+                        </div>
+
+                        <div
+                            v-if="elementoSeleccionado.settings.bg_image_dark"
+                            class="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200/60 dark:border-indigo-800/40 space-y-3 transition-all"
+                        >
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1.5 text-[11px] font-bold text-indigo-800 dark:text-indigo-300">
+                                    <i class="pi pi-sliders-h text-xs" />
+                                    <span>Opciones de Fondo (Oscuro)</span>
+                                </div>
+
+                                <div class="flex items-center bg-white dark:bg-zinc-800 p-0.5 rounded-lg border border-indigo-200/60 dark:border-indigo-800/40 text-[10px]">
+                                    <button
+                                        type="button"
+                                        @click="dispositivoFondoDark = 'desktop'"
+                                        :class="[
+                                            'px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold transition-all cursor-pointer',
+                                            dispositivoFondoDark === 'desktop' ? 'bg-indigo-600 text-white shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                                        ]"
+                                    >
+                                        <i class="pi pi-desktop text-[10px]" />
+                                        <span>PC</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="dispositivoFondoDark = 'tablet'"
+                                        :class="[
+                                            'px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold transition-all cursor-pointer',
+                                            dispositivoFondoDark === 'tablet' ? 'bg-indigo-600 text-white shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                                        ]"
+                                    >
+                                        <i class="pi pi-tablet text-[10px]" />
+                                        <span>Tablet</span>
+                                        <span v-if="(elementoSeleccionado.settings.bg_size_tablet_dark && elementoSeleccionado.settings.bg_size_tablet_dark !== 'inherit') || (elementoSeleccionado.settings.bg_position_tablet_dark && elementoSeleccionado.settings.bg_position_tablet_dark !== 'inherit')" class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="dispositivoFondoDark = 'mobile'"
+                                        :class="[
+                                            'px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold transition-all cursor-pointer',
+                                            dispositivoFondoDark === 'mobile' ? 'bg-indigo-600 text-white shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                                        ]"
+                                    >
+                                        <i class="pi pi-mobile text-[10px]" />
+                                        <span>Móvil</span>
+                                        <span v-if="(elementoSeleccionado.settings.bg_size_mobile_dark && elementoSeleccionado.settings.bg_size_mobile_dark !== 'inherit') || (elementoSeleccionado.settings.bg_position_mobile_dark && elementoSeleccionado.settings.bg_position_mobile_dark !== 'inherit') || elementoSeleccionado.settings.bg_image_mobile_dark" class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PC (OSCURO) -->
+                            <template v-if="dispositivoFondoDark === 'desktop'">
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Tamaño / Escalado (PC)</label>
+                                        <Select
+                                            v-model="bgSizeDarkModel"
+                                            :options="opcionesBgSizeCompleto"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Posición / Encuadre (PC)</label>
+                                        <Select
+                                            v-model="bgPositionDarkModel"
+                                            :options="opcionesBgPosition"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Efecto Desplazamiento</label>
+                                        <Select
+                                            v-model="bgAttachmentDarkModel"
+                                            :options="opcionesBgAttachment"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Repetición / Patrón</label>
+                                        <Select
+                                            v-model="bgRepeatDarkModel"
+                                            :options="opcionesBgRepeat"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Modo Fusión (Blend)</label>
+                                        <Select
+                                            v-model="bgBlendModeDarkModel"
+                                            :options="opcionesBgBlendMode"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Filtro / Efecto Visual</label>
+                                        <Select
+                                            v-model="bgFilterDarkModel"
+                                            :options="opcionesBgFilter"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- TABLET (OSCURO) -->
+                            <template v-else-if="dispositivoFondoDark === 'tablet'">
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Tamaño / Escalado (Tablet)</label>
+                                        <Select
+                                            v-model="bgSizeTabletDarkModel"
+                                            :options="opcionesBgSizeResponsive"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Posición / Encuadre (Tablet)</label>
+                                        <Select
+                                            v-model="bgPositionTabletDarkModel"
+                                            :options="opcionesBgPositionResponsive"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- MÓVIL (OSCURO) -->
+                            <template v-else-if="dispositivoFondoDark === 'mobile'">
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Tamaño / Escalado (Móvil)</label>
+                                        <Select
+                                            v-model="bgSizeMobileDarkModel"
+                                            :options="opcionesBgSizeResponsive"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold mb-1">Posición / Encuadre (Móvil)</label>
+                                        <Select
+                                            v-model="bgPositionMobileDarkModel"
+                                            :options="opcionesBgPositionResponsive"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            class="w-full text-xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="block text-[11px] font-semibold mb-1">Imagen Alternativa Móvil (Oscuro)</label>
+                                    <ImageUploader
+                                        :modelValue="elementoSeleccionado.settings.bg_image_mobile_dark || ''"
+                                        @update:modelValue="(val) => elementoSeleccionado.settings.bg_image_mobile_dark = val"
+                                        placeholder="Dejar vacío para usar la de PC optimizada..."
+                                        :compact="true"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold mb-1">Visibilidad en Móviles (Oscuro)</label>
+                                    <Select
+                                        v-model="bgHideMobileDarkModel"
+                                        :options="opcionesBgHideMobile"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        class="w-full text-xs"
+                                    />
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- MODO 2 (OSCURO): VÍDEO DE FONDO -->
+                    <template v-else-if="bgTypeDarkModel === 'video'">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1.5">Vídeo de Fondo (Modo Oscuro)</label>
+                            <VideoUploader
+                                :modelValue="elementoSeleccionado.settings.bg_video_dark || ''"
+                                @update:modelValue="(val) => elementoSeleccionado.settings.bg_video_dark = val"
+                                placeholder="Seleccionar vídeo para Modo Oscuro..."
+                                help="Se reproduce exclusivamente cuando el visitante navega en Modo Oscuro."
+                            />
+                        </div>
+
+                        <div class="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200/60 dark:border-indigo-800/40 space-y-3 transition-all">
+                            <div class="flex items-center gap-1.5 text-[11px] font-bold text-indigo-800 dark:text-indigo-300">
+                                <i class="pi pi-sliders-h text-xs" />
+                                <span>Opciones de Vídeo (Oscuro)</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold mb-1">Imagen Póster / Fallback Móvil (Oscuro)</label>
+                                <ImageUploader
+                                    :modelValue="elementoSeleccionado.settings.bg_video_poster_dark || ''"
+                                    @update:modelValue="(val) => elementoSeleccionado.settings.bg_video_poster_dark = val"
+                                    directorio="fondos"
+                                    placeholder="Seleccionar imagen póster oscura..."
+                                    :compact="true"
+                                />
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold mb-1">Comportamiento en Móviles (Oscuro)</label>
+                                <Select
+                                    v-model="bgVideoMobileDarkModel"
+                                    :options="opcionesBgVideoMobile"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    class="w-full text-xs"
+                                />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[11px] font-semibold mb-1">Encuadre Focal</label>
+                                    <Select
+                                        v-model="bgVideoPositionDarkModel"
+                                        :options="opcionesBgVideoPosition"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        class="w-full text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold mb-1">Velocidad</label>
+                                    <Select
+                                        v-model="bgVideoPlaybackRateDarkModel"
+                                        :options="opcionesBgVideoPlaybackRate"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        class="w-full text-xs"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold">Color / Gradiente (Oscuro)</label>
+                                <button
+                                    v-if="elementoSeleccionado.settings.bg_color_dark"
+                                    type="button"
+                                    @click="elementoSeleccionado.settings.bg_color_dark = ''"
+                                    class="text-[10px] text-red-500 hover:underline cursor-pointer"
+                                >
+                                    Limpiar
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="color"
+                                    v-model="customBgColorDarkPickerModel"
+                                    class="w-8 h-8 rounded border border-zinc-300 dark:border-zinc-700 cursor-pointer"
+                                />
+                                <InputText
+                                    :modelValue="elementoSeleccionado.settings.bg_color_dark || ''"
+                                    @update:modelValue="(val) => elementoSeleccionado.settings.bg_color_dark = val"
+                                    placeholder="Transparente o #09090b"
+                                    class="w-full text-xs font-mono"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold">Overlay (Oscuro)</label>
+                                <button
+                                    v-if="elementoSeleccionado.settings.bg_overlay_dark"
+                                    type="button"
+                                    @click="elementoSeleccionado.settings.bg_overlay_dark = ''"
+                                    class="text-[10px] text-red-500 hover:underline cursor-pointer"
+                                >
+                                    Limpiar
+                                </button>
+                            </div>
+                            <InputText
+                                :modelValue="elementoSeleccionado.settings.bg_overlay_dark || ''"
+                                @update:modelValue="(val) => elementoSeleccionado.settings.bg_overlay_dark = val"
+                                placeholder="ej. rgba(0,0,0,0.6)"
+                                class="w-full text-xs font-mono"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5">Color de Texto Forzado (Modo Oscuro)</label>
+                        <Select
+                            v-model="textColorDarkModel"
+                            :options="opcionesColorTextoDark"
+                            optionLabel="label"
+                            optionValue="value"
+                            class="w-full text-xs"
+                        />
+                    </div>
+                </template>
+            </template>
         </div>
 
         <!-- BLOQUE 3: ESPACIADO INTERNO Y EXTERNO -->
@@ -1150,11 +1914,24 @@ const transparentHeaderNavColorModel = computed({
 
                     <div>
                         <label class="block text-[11px] font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
-                            Estilo del Menú en Transparencia
+                            Estilo del Menú en Transparencia (Modo Claro)
                         </label>
                         <Select
                             v-model="transparentHeaderNavColorModel"
                             :options="opcionesContrasteCabecera"
+                            optionLabel="label"
+                            optionValue="value"
+                            class="w-full text-xs"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
+                            Estilo del Menú en Transparencia (Modo Oscuro)
+                        </label>
+                        <Select
+                            v-model="transparentHeaderNavColorDarkModel"
+                            :options="opcionesContrasteCabeceraDark"
                             optionLabel="label"
                             optionValue="value"
                             class="w-full text-xs"

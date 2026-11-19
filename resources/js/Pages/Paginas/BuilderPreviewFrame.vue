@@ -512,8 +512,13 @@ watch(
         if (setTransparentHeaderOverride) {
             setTransparentHeaderOverride(
                 s?.transparent_header
-                    ? { active: true, pull: Boolean(s.transparent_header_pull), navColor: s.transparent_header_nav_color || 'inherit' }
-                    : { active: false, pull: false, navColor: 'inherit' }
+                    ? {
+                        active: true,
+                        pull: Boolean(s.transparent_header_pull),
+                        navColor: s.transparent_header_nav_color || 'inherit',
+                        navColorDark: s.transparent_header_nav_color_dark || 'same',
+                    }
+                    : { active: false, pull: false, navColor: 'inherit', navColorDark: 'same' }
             );
         }
     },
@@ -603,6 +608,13 @@ const handleParentMessage = (event) => {
                 });
             }
             break;
+
+        case 'CMS_BUILDER_SET_THEME':
+            if (typeof document !== 'undefined') {
+                const wantDark = event.data.theme === 'dark';
+                document.documentElement.classList.toggle('dark', wantDark);
+            }
+            break;
     }
 };
 
@@ -677,15 +689,34 @@ const handleDocumentClick = (e) => {
     }
 };
 
+let frameThemeObserver = null;
+
 onMounted(() => {
     if (typeof window !== 'undefined') {
         window.addEventListener('message', handleParentMessage);
         window.addEventListener('cms-builder-pagination-change', handlePaginationChange);
         document.addEventListener('click', handleDocumentClick, true);
 
-        // Notificar al editor padre que el iframe está montado y listo
+        const notifyThemeToParent = () => {
+            if (window.parent && window.parent !== window && typeof document !== 'undefined') {
+                window.parent.postMessage({
+                    type: 'CMS_PREVIEW_THEME_CHANGED',
+                    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                }, '*');
+            }
+        };
+
+        // Notificar al editor padre que el iframe está montado y listo junto con el tema inicial
         if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'CMS_BUILDER_FRAME_READY' }, '*');
+            window.parent.postMessage({
+                type: 'CMS_BUILDER_FRAME_READY',
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+            }, '*');
+        }
+
+        if (typeof MutationObserver !== 'undefined') {
+            frameThemeObserver = new MutationObserver(notifyThemeToParent);
+            frameThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         }
 
         nextTick(() => {
@@ -695,6 +726,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    if (frameThemeObserver) {
+        frameThemeObserver.disconnect();
+        frameThemeObserver = null;
+    }
     if (typeof window !== 'undefined') {
         window.removeEventListener('message', handleParentMessage);
         window.removeEventListener('cms-builder-pagination-change', handlePaginationChange);

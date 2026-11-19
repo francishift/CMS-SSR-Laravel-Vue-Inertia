@@ -46,9 +46,11 @@ export function usePageBuilder(props) {
                     bg_position_tablet: '',
                     bg_position_mobile: '',
                     bg_overlay: '',
+                    bg_dark_mode: 'inherit',
                     transparent_header: false,
                     transparent_header_pull: false,
                     transparent_header_nav_color: 'inherit',
+                    transparent_header_nav_color_dark: 'same',
                 },
                 rows: [
                     {
@@ -1365,13 +1367,15 @@ export function usePageBuilder(props) {
                 bg_color: '',
                 bg_image: '',
                 bg_overlay: '',
-                sticky: '',
+                bg_dark_mode: 'inherit',
+                 sticky: '',
                 text_color: '',
                 vertical_align: 'top',
                 height_type: 'none',
                 transparent_header: false,
                 transparent_header_pull: false,
                 transparent_header_nav_color: 'inherit',
+                transparent_header_nav_color_dark: 'same',
             };
         }
         if (elem && tipo === 'element') {

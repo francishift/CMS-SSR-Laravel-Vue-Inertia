@@ -8,7 +8,7 @@
  */
 import { Link, router } from '@inertiajs/vue3';
 import { computed, inject, ref, onMounted, onUnmounted, useId } from 'vue';
-import { useSanitize } from '@/Composables/useSanitize';
+import { useSanitize, sanitizeInlineCss } from '@/Composables/useSanitize';
 import { useListAutoExpire } from '@/Composables/useAutoExpire';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
 import { esNavegacionInertia, getRutaInterna } from '@/Composables/useUrlHelpers';
@@ -123,7 +123,7 @@ if (typeof window !== 'undefined') {
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 // Identificador único para scoping de CSS de fondo de tarjeta
 const gridUid = `grid-bg-${useId()}`;
@@ -732,8 +732,8 @@ const downloadCardConfig = computed(() => {
         v-bind="gridBlockAnimAttrs"
     >
         <!-- Inyección de CSS de gradientes de fondo de tarjeta -->
-        <component :is="'style'" v-if="cardBgCss" v-text="cardBgCss" />
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="cardBgCss" v-html="sanitizeInlineCss(cardBgCss)" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
         <!-- Encabezado opcional de la Sección Grid -->
         <div
             v-if="props.content?.grid_header_title"

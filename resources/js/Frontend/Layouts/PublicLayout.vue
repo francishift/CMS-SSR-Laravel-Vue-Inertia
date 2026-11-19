@@ -81,6 +81,7 @@ const cabeceraTransparenteConfig = computed(() => {
             active: true,
             pull: Boolean(firstSection.settings.transparent_header_pull),
             navColor: firstSection.settings.transparent_header_nav_color || 'inherit',
+            navColorDark: firstSection.settings.transparent_header_nav_color_dark || 'same',
         };
     }
 

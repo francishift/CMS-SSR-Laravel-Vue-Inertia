@@ -7,13 +7,17 @@
  */
 import BuilderRow from './BuilderRow.vue';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { imageUrl } from '@/Composables/useImage';
+import { sanitizeInlineCss } from '@/Composables/useSanitize';
 
 const props = defineProps({
     section: { type: Object, required: true },
     index: { type: Number, default: 0 },
 });
+
+const page = usePage();
+const siteSettings = computed(() => page.props?.siteSettings || {});
 
 // Detectar si la sección es la primera (Hero / LCP)
 const isFirstSection = computed(() => props.index === 0);
@@ -30,14 +34,20 @@ watch(
         isFirstSection.value,
         settings.value.transparent_header,
         settings.value.transparent_header_pull,
-        settings.value.transparent_header_nav_color
+        settings.value.transparent_header_nav_color,
+        settings.value.transparent_header_nav_color_dark,
     ],
-    ([isFirst, isTrans, pull, navColor]) => {
+    ([isFirst, isTrans, pull, navColor, navColorDark]) => {
         if (setTransparentHeaderOverride && isFirst) {
             setTransparentHeaderOverride(
                 isTrans
-                    ? { active: true, pull: Boolean(pull), navColor: navColor || 'inherit' }
-                    : { active: false, pull: false, navColor: 'inherit' }
+                    ? {
+                        active: true,
+                        pull: Boolean(pull),
+                        navColor: navColor || 'inherit',
+                        navColorDark: navColorDark || 'same',
+                    }
+                    : { active: false, pull: false, navColor: 'inherit', navColorDark: 'same' }
             );
         }
     },
@@ -82,10 +92,10 @@ const htmlTag = computed(() => {
     return ['section', 'div', 'header', 'footer', 'main', 'article'].includes(tag) ? tag : 'section';
 });
 
-// Personalización avanzada de código
+// Personalización avanzada de código (sanitizada sin escapar selectores CSS '>' en SSR)
 const customId = computed(() => settings.value.element_id || undefined);
 const customClasses = computed(() => settings.value.custom_classes || '');
-const customCss = computed(() => settings.value.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(settings.value.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = settings.value.custom_attributes;
@@ -348,12 +358,38 @@ const rowGapClass = computed(() => {
     return [mClass, tClass, dClass].filter(Boolean).join(' ');
 });
 
+// Determinar si la sección utiliza una configuración de fondo independiente para Modo Oscuro
+const isCustomDarkBg = computed(() => settings.value.bg_dark_mode === 'custom');
+
+const lightCustomBg = computed(() => {
+    const val = settings.value.bg_color;
+    return typeof val === 'string' ? val.trim() : '';
+});
+
+const darkCustomBg = computed(() => {
+    if (!isCustomDarkBg.value) return lightCustomBg.value;
+    const val = settings.value.bg_color_dark;
+    return typeof val === 'string' ? val.trim() : '';
+});
+
+const hasCustomSectionBg = computed(() => {
+    const bgPreset = settings.value.bg_preset;
+    return (!bgPreset || bgPreset === 'transparent') && Boolean(lightCustomBg.value || darkCustomBg.value);
+});
+
 const bgPresetClass = computed(() => {
     const bg = settings.value.bg_preset;
-    const customBg = settings.value.bg_color || settings.value.bg_image;
-    
+    const hasAnyMediaOrBg = Boolean(
+        lightCustomBg.value
+        || settings.value.bg_image
+        || settings.value.bg_video
+        || (isCustomDarkBg.value && (darkCustomBg.value || settings.value.bg_image_dark || settings.value.bg_video_dark))
+    );
+
     const presetMap = {
-        transparent: 'bg-transparent text-[var(--site-text)]',
+        transparent: hasCustomSectionBg.value
+            ? 'builder-section-custom-bg text-[var(--site-text)]'
+            : 'bg-transparent text-[var(--site-text)]',
         white: 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100',
         zinc_50: 'bg-zinc-50 dark:bg-zinc-900/60 text-zinc-900 dark:text-zinc-100',
         zinc_900: 'bg-zinc-900 dark:bg-zinc-900 text-white dark',
@@ -363,16 +399,33 @@ const bgPresetClass = computed(() => {
     };
 
     if (bg && presetMap[bg]) return presetMap[bg];
-    if (customBg) return '';
+    if (hasCustomSectionBg.value) return 'builder-section-custom-bg text-[var(--site-text)]';
+    if (hasAnyMediaOrBg) return 'text-[var(--site-text)]';
     return 'bg-transparent text-[var(--site-text)]';
 });
 
-// Color de texto forzado (Light / Dark / Inherit)
+// Color de texto forzado (Light / Dark / Inherit) con soporte independiente en Modo Oscuro
 const textColorClass = computed(() => {
-    const color = settings.value.text_color;
-    if (color === 'light') return 'section-text-light !text-white dark';
-    if (color === 'dark') return 'section-text-dark !text-zinc-900 light';
-    return '';
+    const lightColor = settings.value.text_color || 'inherit';
+    const rawDarkColor = settings.value.text_color_dark || 'same';
+    const darkColor = (!isCustomDarkBg.value || !rawDarkColor || rawDarkColor === 'same')
+        ? lightColor
+        : rawDarkColor;
+
+    if (lightColor === darkColor) {
+        if (lightColor === 'light') return 'section-text-light !text-white dark';
+        if (lightColor === 'dark') return 'section-text-dark !text-zinc-900 light';
+        return '';
+    }
+
+    const classes = [];
+    if (lightColor === 'light') classes.push('section-light-mode-text-light');
+    else if (lightColor === 'dark') classes.push('section-light-mode-text-dark');
+
+    if (darkColor === 'light') classes.push('section-dark-mode-text-light');
+    else if (darkColor === 'dark') classes.push('section-dark-mode-text-dark');
+
+    return classes.join(' ');
 });
 
 // Alineación vertical del contenido cuando hay altura activa
@@ -384,14 +437,205 @@ const verticalAlignClass = computed(() => {
     return 'flex flex-col justify-start';
 });
 
-// Referencia al elemento <video> y observador de visibilidad
+// Referencias a elementos <video> (Claro y Oscuro) y observadores
 const bgVideoRef = ref(null);
+const bgVideoDarkRef = ref(null);
 let videoObserver = null;
+let themeClassObserver = null;
 
-// Detección de Vídeo de Fondo
-const hasBgVideo = computed(() => {
-    return settings.value.bg_type === 'video' && Boolean(settings.value.bg_video);
+/**
+ * Resuelve URLs responsivas optimizadas en WebP para una imagen de fondo (PC, Tablet y Móvil).
+ */
+function resolveResponsiveBgUrls(mainImg, mobImg) {
+    if (!mainImg || typeof mainImg !== 'string') {
+        return { desktop: '', tablet: '', mobile: '' };
+    }
+    const cleanMain = mainImg.trim();
+    if (!cleanMain || (cleanMain.startsWith('{') && cleanMain.endsWith('}'))) {
+        return { desktop: '', tablet: '', mobile: '' };
+    }
+
+    const deskUrl = imageUrl(cleanMain, { w: 1920, q: 85, f: 'webp', fit: 'scale' }) || cleanMain;
+    const tabUrl = imageUrl(cleanMain, { w: 1280, q: 85, f: 'webp', fit: 'scale' }) || deskUrl;
+
+    let mobUrl = '';
+    if (mobImg && typeof mobImg === 'string' && mobImg.trim() && !(mobImg.trim().startsWith('{') && mobImg.trim().endsWith('}'))) {
+        mobUrl = imageUrl(mobImg.trim(), { w: 768, q: 82, f: 'webp', fit: 'scale' }) || mobImg.trim();
+    } else {
+        mobUrl = imageUrl(cleanMain, { w: 768, q: 82, f: 'webp', fit: 'scale' }) || deskUrl;
+    }
+
+    return {
+        desktop: deskUrl,
+        tablet: tabUrl,
+        mobile: mobUrl,
+    };
+}
+
+/**
+ * Normaliza la URL de un vídeo de fondo (local o remota), descartando tokens dinámicos sin resolver.
+ */
+function normalizeVideoSrc(raw) {
+    if (!raw || typeof raw !== 'string') return '';
+    const clean = raw.trim();
+    if (!clean || (clean.startsWith('{') && clean.endsWith('}'))) return '';
+    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/')) {
+        return clean;
+    }
+    return `/${clean}`;
+}
+
+/**
+ * Resuelve la imagen póster de un vídeo o reutiliza la imagen de fondo correspondiente.
+ */
+function resolvePosterUrl(customPoster, fallbackDesktopUrl) {
+    if (customPoster && typeof customPoster === 'string' && customPoster.trim()) {
+        const clean = customPoster.trim();
+        if (!(clean.startsWith('{') && clean.endsWith('}'))) {
+            return imageUrl(clean, { w: 1920, q: 85, f: 'webp', fit: 'scale' }) || clean;
+        }
+    }
+    return fallbackDesktopUrl || '';
+}
+
+/**
+ * Construye el objeto reactivo de estilos y variables CSS para una capa `.builder-bg-layer`.
+ */
+function computeBgImageLayerStyle(urls, cfg) {
+    if (!urls.desktop) return {};
+
+    const sz = cfg.size || 'cover';
+    const pos = cfg.position || 'center center';
+    const rep = cfg.repeat || 'no-repeat';
+    const att = cfg.attachment || 'scroll';
+    const blend = cfg.blendMode || 'normal';
+    const filter = cfg.filter || 'none';
+    const customBg = cfg.customBg || '';
+
+    const szTab = cfg.sizeTablet;
+    const szMob = cfg.sizeMobile;
+    const posTab = cfg.posTablet;
+    const posMob = cfg.posMobile;
+
+    const styles = {
+        backgroundRepeat: rep,
+    };
+
+    if (vistaDispositivo.value === 'mobile') {
+        const effectiveSz = (szMob && szMob !== 'inherit') ? szMob : ((szTab && szTab !== 'inherit') ? szTab : sz);
+        const effectivePos = (posMob && posMob !== 'inherit') ? posMob : ((posTab && posTab !== 'inherit') ? posTab : pos);
+        styles.backgroundImage = `url(${urls.mobile})`;
+        styles.backgroundSize = effectiveSz;
+        styles.backgroundPosition = effectivePos;
+    } else if (vistaDispositivo.value === 'tablet') {
+        const effectiveSz = (szTab && szTab !== 'inherit') ? szTab : sz;
+        const effectivePos = (posTab && posTab !== 'inherit') ? posTab : pos;
+        styles.backgroundImage = `url(${urls.tablet})`;
+        styles.backgroundSize = effectiveSz;
+        styles.backgroundPosition = effectivePos;
+    } else {
+        const effectiveTabSz = (szTab && szTab !== 'inherit') ? szTab : sz;
+        const effectiveTabPos = (posTab && posTab !== 'inherit') ? posTab : pos;
+        const effectiveMobSz = (szMob && szMob !== 'inherit') ? szMob : effectiveTabSz;
+        const effectiveMobPos = (posMob && posMob !== 'inherit') ? posMob : effectiveTabPos;
+
+        styles['--bg-url-desk'] = `url(${urls.desktop})`;
+        styles['--bg-url-tab'] = `url(${urls.tablet})`;
+        styles['--bg-url-mob'] = `url(${urls.mobile})`;
+
+        styles['--bg-sz-desk'] = sz;
+        styles['--bg-pos-desk'] = pos;
+        styles['--bg-sz-tab'] = effectiveTabSz;
+        styles['--bg-pos-tab'] = effectiveTabPos;
+        styles['--bg-sz-mob'] = effectiveMobSz;
+        styles['--bg-pos-mob'] = effectiveMobPos;
+    }
+
+    // Solo aplicar backgroundColor en la capa de imagen cuando sea un color CSS válido (no un gradiente)
+    if (customBg && !customBg.includes('gradient')) {
+        styles.backgroundColor = customBg;
+    }
+
+    if (att === 'fixed') {
+        styles.backgroundAttachment = 'fixed';
+    }
+
+    if (blend && blend !== 'normal') {
+        styles.backgroundBlendMode = blend;
+        styles.mixBlendMode = blend;
+    }
+
+    if (filter === 'grayscale') {
+        styles.filter = 'grayscale(100%)';
+    } else if (filter === 'blur') {
+        styles.filter = 'blur(8px)';
+        styles.transform = 'scale(1.08)';
+    } else if (filter === 'sepia') {
+        styles.filter = 'sepia(100%)';
+    } else if (filter === 'brightness_contrast') {
+        styles.filter = 'brightness(1.2) contrast(1.2)';
+    }
+
+    return styles;
+}
+
+// ─── Recursos y Estilos Multimedia: Modo Claro (o compartido si bg_dark_mode !== 'custom') ───
+const bgUrls = computed(() => resolveResponsiveBgUrls(settings.value.bg_image, settings.value.bg_image_mobile));
+const normalizedBgVideoUrl = computed(() => normalizeVideoSrc(settings.value.bg_video));
+const hasBgVideo = computed(() => (settings.value.bg_type || 'image') === 'video' && Boolean(normalizedBgVideoUrl.value));
+const hasLightBgImage = computed(() => !hasBgVideo.value && Boolean(bgUrls.value.desktop));
+const effectivePosterUrl = computed(() => resolvePosterUrl(settings.value.bg_video_poster, bgUrls.value.desktop));
+const bgHideMobileClass = computed(() => settings.value.bg_hide_mobile === 'hidden_mobile' ? 'hidden md:block' : '');
+const bgVideoPositionStyle = computed(() => ({
+    objectPosition: settings.value.bg_video_position || 'center center',
+}));
+const bgImageLayerStyle = computed(() => computeBgImageLayerStyle(bgUrls.value, {
+    size: settings.value.bg_size,
+    position: settings.value.bg_position,
+    sizeTablet: settings.value.bg_size_tablet,
+    posTablet: settings.value.bg_position_tablet,
+    sizeMobile: settings.value.bg_size_mobile,
+    posMobile: settings.value.bg_position_mobile,
+    attachment: settings.value.bg_attachment,
+    repeat: settings.value.bg_repeat,
+    blendMode: settings.value.bg_blend_mode,
+    filter: settings.value.bg_filter,
+    customBg: lightCustomBg.value,
+}));
+
+// ─── Recursos y Estilos Multimedia: Modo Oscuro Independiente (bg_dark_mode === 'custom') ───
+const darkBgUrls = computed(() => {
+    if (!isCustomDarkBg.value) return { desktop: '', tablet: '', mobile: '' };
+    return resolveResponsiveBgUrls(settings.value.bg_image_dark, settings.value.bg_image_mobile_dark);
 });
+const normalizedDarkBgVideoUrl = computed(() => {
+    if (!isCustomDarkBg.value) return '';
+    return normalizeVideoSrc(settings.value.bg_video_dark);
+});
+const hasDarkBgVideo = computed(() => {
+    return isCustomDarkBg.value && (settings.value.bg_type_dark || 'image') === 'video' && Boolean(normalizedDarkBgVideoUrl.value);
+});
+const hasDarkBgImage = computed(() => {
+    return isCustomDarkBg.value && !hasDarkBgVideo.value && Boolean(darkBgUrls.value.desktop);
+});
+const effectiveDarkPosterUrl = computed(() => resolvePosterUrl(settings.value.bg_video_poster_dark, darkBgUrls.value.desktop));
+const darkBgHideMobileClass = computed(() => settings.value.bg_hide_mobile_dark === 'hidden_mobile' ? 'hidden md:block' : '');
+const darkBgVideoPositionStyle = computed(() => ({
+    objectPosition: settings.value.bg_video_position_dark || 'center center',
+}));
+const darkBgImageLayerStyle = computed(() => computeBgImageLayerStyle(darkBgUrls.value, {
+    size: settings.value.bg_size_dark,
+    position: settings.value.bg_position_dark,
+    sizeTablet: settings.value.bg_size_tablet_dark,
+    posTablet: settings.value.bg_position_tablet_dark,
+    sizeMobile: settings.value.bg_size_mobile_dark,
+    posMobile: settings.value.bg_position_mobile_dark,
+    attachment: settings.value.bg_attachment_dark,
+    repeat: settings.value.bg_repeat_dark,
+    blendMode: settings.value.bg_blend_mode_dark,
+    filter: settings.value.bg_filter_dark,
+    customBg: darkCustomBg.value,
+}));
 
 // Clase de Posicionamiento y Efecto Pegajoso (Efecto Telón)
 const positionClass = computed(() => {
@@ -402,7 +646,7 @@ const positionClass = computed(() => {
     if (sticky === 'fixed_top') {
         return 'sticky top-0 lg:top-16 z-30 shadow-md';
     }
-    const hasMediaBg = Boolean(settings.value.bg_image) || hasBgVideo.value;
+    const hasMediaBg = hasLightBgImage.value || hasBgVideo.value || hasDarkBgImage.value || hasDarkBgVideo.value;
     return hasMediaBg ? 'relative z-10 overflow-hidden' : 'relative z-10';
 });
 
@@ -431,165 +675,12 @@ const heightStyle = computed(() => {
     return styles;
 });
 
-const bgHideMobileClass = computed(() => {
-    return settings.value.bg_hide_mobile === 'hidden_mobile' ? 'hidden md:block' : '';
-});
-
-const bgUrls = computed(() => {
-    const mainImg = settings.value.bg_image;
-    if (!mainImg || typeof mainImg !== 'string') {
-        return { desktop: '', tablet: '', mobile: '' };
-    }
-    const cleanMain = mainImg.trim();
-    if (!cleanMain) {
-        return { desktop: '', tablet: '', mobile: '' };
-    }
-
-    const deskUrl = imageUrl(cleanMain, { w: 1920, q: 85, f: 'webp', fit: 'scale' }) || cleanMain;
-    const tabUrl = imageUrl(cleanMain, { w: 1280, q: 85, f: 'webp', fit: 'scale' }) || deskUrl;
-
-    // Si el usuario configuró una imagen independiente para móvil:
-    const mobImg = settings.value.bg_image_mobile;
-    let mobUrl = '';
-    if (mobImg && typeof mobImg === 'string' && mobImg.trim()) {
-        mobUrl = imageUrl(mobImg.trim(), { w: 768, q: 82, f: 'webp', fit: 'scale' }) || mobImg.trim();
-    } else {
-        mobUrl = imageUrl(cleanMain, { w: 768, q: 82, f: 'webp', fit: 'scale' }) || deskUrl;
-    }
-
-    return {
-        desktop: deskUrl,
-        tablet: tabUrl,
-        mobile: mobUrl,
-    };
-});
-
-const formattedBgImageUrl = computed(() => {
-    return bgUrls.value.desktop;
-});
-
-// Normalización de la URL del vídeo de fondo (local o remota)
-const normalizedBgVideoUrl = computed(() => {
-    const raw = settings.value.bg_video;
-    if (!raw || typeof raw !== 'string') return '';
-    const clean = raw.trim();
-    if (!clean) return '';
-    // Detectar si es una etiqueta dinámica sin resolver (ej: {article.extra_fields.video})
-    if (clean.startsWith('{') && clean.endsWith('}')) return '';
-    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/')) {
-        return clean;
-    }
-    return `/${clean}`;
-});
-
-// Imagen Póster o Fallback (específica o heredada de la imagen de fondo)
-const effectivePosterUrl = computed(() => {
-    const customPoster = settings.value.bg_video_poster;
-    if (customPoster && typeof customPoster === 'string' && customPoster.trim()) {
-        const clean = customPoster.trim();
-        return imageUrl(clean, { w: 1920, q: 85, f: 'webp', fit: 'scale' }) || clean;
-    }
-    return bgUrls.value.desktop || '';
-});
-
-// Encuadre focal del vídeo (object-position)
-const bgVideoPositionStyle = computed(() => {
-    const pos = settings.value.bg_video_position || 'center center';
-    return {
-        objectPosition: pos,
-    };
-});
-
-const bgImageLayerStyle = computed(() => {
-    const urls = bgUrls.value;
-    if (!urls.desktop) return {};
-
-    const sz = settings.value.bg_size || 'cover';
-    const pos = settings.value.bg_position || 'center center';
-    const rep = settings.value.bg_repeat || 'no-repeat';
-    const att = settings.value.bg_attachment || 'scroll';
-    const blend = settings.value.bg_blend_mode || 'normal';
-    const filter = settings.value.bg_filter || 'none';
-    const customBg = settings.value.bg_color;
-
-    // Configuración responsiva para Tablet y Móvil
-    const szTab = settings.value.bg_size_tablet;
-    const szMob = settings.value.bg_size_mobile;
-    const posTab = settings.value.bg_position_tablet;
-    const posMob = settings.value.bg_position_mobile;
-
-    const styles = {
-        backgroundRepeat: rep,
-    };
-
-    // Si estamos en la previsualización del editor con simulación manual de dispositivo:
-    if (vistaDispositivo.value === 'mobile') {
-        const effectiveSz = (szMob && szMob !== 'inherit') ? szMob : ((szTab && szTab !== 'inherit') ? szTab : sz);
-        const effectivePos = (posMob && posMob !== 'inherit') ? posMob : ((posTab && posTab !== 'inherit') ? posTab : pos);
-        styles.backgroundImage = `url(${urls.mobile})`;
-        styles.backgroundSize = effectiveSz;
-        styles.backgroundPosition = effectivePos;
-    } else if (vistaDispositivo.value === 'tablet') {
-        const effectiveSz = (szTab && szTab !== 'inherit') ? szTab : sz;
-        const effectivePos = (posTab && posTab !== 'inherit') ? posTab : pos;
-        styles.backgroundImage = `url(${urls.tablet})`;
-        styles.backgroundSize = effectiveSz;
-        styles.backgroundPosition = effectivePos;
-    } else {
-        // En frontend público o escritorio: variables CSS para resolución limpia vía media queries
-        const effectiveTabSz = (szTab && szTab !== 'inherit') ? szTab : sz;
-        const effectiveTabPos = (posTab && posTab !== 'inherit') ? posTab : pos;
-        const effectiveMobSz = (szMob && szMob !== 'inherit') ? szMob : effectiveTabSz;
-        const effectiveMobPos = (posMob && posMob !== 'inherit') ? posMob : effectiveTabPos;
-
-        styles['--bg-url-desk'] = `url(${urls.desktop})`;
-        styles['--bg-url-tab'] = `url(${urls.tablet})`;
-        styles['--bg-url-mob'] = `url(${urls.mobile})`;
-
-        styles['--bg-sz-desk'] = sz;
-        styles['--bg-pos-desk'] = pos;
-        styles['--bg-sz-tab'] = effectiveTabSz;
-        styles['--bg-pos-tab'] = effectiveTabPos;
-        styles['--bg-sz-mob'] = effectiveMobSz;
-        styles['--bg-pos-mob'] = effectiveMobPos;
-    }
-
-    // Color base para permitir la mezcla de color con backgroundBlendMode y mixBlendMode
-    if (customBg) {
-        styles.backgroundColor = customBg;
-    }
-
-    if (att === 'fixed') {
-        styles.backgroundAttachment = 'fixed';
-    }
-
-    if (blend && blend !== 'normal') {
-        styles.backgroundBlendMode = blend;
-        styles.mixBlendMode = blend;
-    }
-
-    if (filter === 'grayscale') {
-        styles.filter = 'grayscale(100%)';
-    } else if (filter === 'blur') {
-        styles.filter = 'blur(8px)';
-        styles.transform = 'scale(1.08)';
-    } else if (filter === 'sepia') {
-        styles.filter = 'sepia(100%)';
-    } else if (filter === 'brightness_contrast') {
-        styles.filter = 'brightness(1.2) contrast(1.2)';
-    }
-
-    return styles;
-});
-
 const bgStyle = computed(() => {
-    const customBg = settings.value.bg_color;
-    const bgPreset = settings.value.bg_preset;
     const styles = { ...heightStyle.value };
 
-    // Si no hay preset o el preset es transparente/por defecto, aplicar el color personalizado inline
-    if (customBg && (!bgPreset || bgPreset === 'transparent')) {
-        styles.backgroundColor = customBg;
+    if (hasCustomSectionBg.value) {
+        styles['--sec-bg-light'] = lightCustomBg.value || 'transparent';
+        styles['--sec-bg-dark'] = darkCustomBg.value || 'transparent';
     }
 
     if (sectionAnimation.value !== 'none' && sectionDelay.value > 0) {
@@ -599,43 +690,161 @@ const bgStyle = computed(() => {
     return styles;
 });
 
-const overlayStyle = computed(() => {
+// ─── Capa de Superposición (Overlay) con resolución instantánea SSR por variables CSS ───
+const lightOverlay = computed(() => {
     const val = settings.value.bg_overlay;
-    if (!val || typeof val !== 'string') return {};
-    const clean = val.trim();
-    if (clean.includes('gradient')) {
-        return { background: clean };
-    }
-    return { backgroundColor: clean };
+    return typeof val === 'string' ? val.trim() : '';
 });
 
-// Ciclo de vida: Inicialización segura de vídeo, Muted forzado y Observador de Visibilidad
+const darkOverlay = computed(() => {
+    if (!isCustomDarkBg.value) return lightOverlay.value;
+    const val = settings.value.bg_overlay_dark;
+    return typeof val === 'string' ? val.trim() : '';
+});
+
+const hasAnyOverlay = computed(() => Boolean(lightOverlay.value || darkOverlay.value));
+
+const overlayVisibilityClass = computed(() => {
+    if (!isCustomDarkBg.value) return '';
+    if (!lightOverlay.value && darkOverlay.value) return 'builder-media-only-dark';
+    if (lightOverlay.value && !darkOverlay.value) return 'builder-media-only-light';
+    return '';
+});
+
+const overlayStyle = computed(() => {
+    if (!hasAnyOverlay.value) return {};
+    return {
+        '--sec-overlay-light': lightOverlay.value || 'transparent',
+        '--sec-overlay-dark': darkOverlay.value || 'transparent',
+    };
+});
+
+// ─── Preload LCP Inteligente en <Head> consciente del Tema Público (Cero descargas innecesarias en SEO) ───
+function buildSidePreloads(hasVid, poster, urls, hideMob, schemeMedia = '') {
+    const list = [];
+    const prefix = schemeMedia ? `${schemeMedia} and ` : '';
+
+    if (hasVid && poster) {
+        list.push({ href: poster, media: schemeMedia || undefined });
+        return list;
+    }
+
+    if (!hasVid && urls.desktop) {
+        if (hideMob !== 'hidden_mobile' && urls.mobile) {
+            list.push({ href: urls.mobile, media: `${prefix}(max-width: 767px)` });
+        }
+        if (urls.tablet) {
+            list.push({ href: urls.tablet, media: `${prefix}(min-width: 768px) and (max-width: 1023px)` });
+        }
+        list.push({ href: urls.desktop, media: `${prefix}(min-width: 1024px)` });
+    }
+
+    return list;
+}
+
+const preloadEntries = computed(() => {
+    if (!isFirstSection.value) return [];
+
+    if (!isCustomDarkBg.value) {
+        return buildSidePreloads(
+            hasBgVideo.value,
+            effectivePosterUrl.value,
+            bgUrls.value,
+            settings.value.bg_hide_mobile
+        );
+    }
+
+    const mode = siteSettings.value.frontend_theme_mode || 'light';
+    const defTheme = siteSettings.value.frontend_default_theme || 'light';
+
+    if (mode === 'light' || (mode === 'user_choice' && defTheme === 'light')) {
+        return buildSidePreloads(
+            hasBgVideo.value,
+            effectivePosterUrl.value,
+            bgUrls.value,
+            settings.value.bg_hide_mobile
+        );
+    }
+
+    if (mode === 'dark' || (mode === 'user_choice' && defTheme === 'dark')) {
+        return buildSidePreloads(
+            hasDarkBgVideo.value,
+            effectiveDarkPosterUrl.value,
+            darkBgUrls.value,
+            settings.value.bg_hide_mobile_dark
+        );
+    }
+
+    // mode === 'user_choice' && defTheme === 'system': filtrar con prefers-color-scheme nativo
+    return [
+        ...buildSidePreloads(
+            hasBgVideo.value,
+            effectivePosterUrl.value,
+            bgUrls.value,
+            settings.value.bg_hide_mobile,
+            '(prefers-color-scheme: light)'
+        ),
+        ...buildSidePreloads(
+            hasDarkBgVideo.value,
+            effectiveDarkPosterUrl.value,
+            darkBgUrls.value,
+            settings.value.bg_hide_mobile_dark,
+            '(prefers-color-scheme: dark)'
+        ),
+    ];
+});
+
+// ─── Ciclo de vida y reproducción eficiente de vídeos de fondo por tema y viewport ───
+function syncVideoElement(el, rateValue, shouldBeActiveForCurrentTheme) {
+    if (!el || typeof window === 'undefined') return;
+    el.muted = true;
+    el.defaultMuted = true;
+
+    const rate = Number(rateValue);
+    if (!isNaN(rate) && rate > 0) {
+        el.playbackRate = rate;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !shouldBeActiveForCurrentTheme) {
+        el.pause();
+        return;
+    }
+
+    el.play().catch(() => {});
+}
+
+function syncVideosByTheme() {
+    if (typeof document === 'undefined') return;
+    const isDarkDoc = document.documentElement.classList.contains('dark');
+
+    if (hasBgVideo.value && bgVideoRef.value) {
+        const activeInTheme = !isCustomDarkBg.value || !isDarkDoc;
+        syncVideoElement(bgVideoRef.value, settings.value.bg_video_playback_rate, activeInTheme);
+    }
+
+    if (hasDarkBgVideo.value && bgVideoDarkRef.value) {
+        syncVideoElement(bgVideoDarkRef.value, settings.value.bg_video_playback_rate_dark, isDarkDoc);
+    }
+}
+
 onMounted(() => {
     if (typeof window === 'undefined') return;
 
-    if (hasBgVideo.value && bgVideoRef.value) {
-        const el = bgVideoRef.value;
-        el.muted = true;
-        el.defaultMuted = true;
+    if (hasBgVideo.value || hasDarkBgVideo.value) {
+        syncVideosByTheme();
 
-        const rate = Number(settings.value.bg_video_playback_rate);
-        if (!isNaN(rate) && rate > 0) {
-            el.playbackRate = rate;
-        }
-
-        // Respetar accesibilidad de reducción de movimiento (prefers-reduced-motion)
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
-            el.pause();
-            return;
-        }
-
-        // Pausar cuando salga del viewport y reanudar al entrar (optimización de FPS y GPU)
         if ('IntersectionObserver' in window) {
             videoObserver = new IntersectionObserver(
                 (entries) => {
+                    const isDarkDoc = document.documentElement.classList.contains('dark');
+                    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     entries.forEach((entry) => {
-                        if (entry.isIntersecting && entry.intersectionRatio > 0) {
+                        const el = entry.target;
+                        const isDarkVideo = el === bgVideoDarkRef.value;
+                        const activeForTheme = isDarkVideo ? isDarkDoc : (!isCustomDarkBg.value || !isDarkDoc);
+
+                        if (!prefersReducedMotion && activeForTheme && entry.isIntersecting && entry.intersectionRatio > 0) {
                             el.play().catch(() => {});
                         } else {
                             el.pause();
@@ -644,75 +853,65 @@ onMounted(() => {
                 },
                 { rootMargin: '150px 0px', threshold: [0, 0.05] }
             );
-            videoObserver.observe(el);
-        } else {
-            el.play().catch(() => {});
+
+            if (bgVideoRef.value) videoObserver.observe(bgVideoRef.value);
+            if (bgVideoDarkRef.value) videoObserver.observe(bgVideoDarkRef.value);
+        }
+
+        if (typeof MutationObserver !== 'undefined') {
+            themeClassObserver = new MutationObserver(() => {
+                syncVideosByTheme();
+            });
+            themeClassObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         }
     }
 });
 
-// Liberación estricta de memoria y decodificadores multimedia en transiciones SPA
 onBeforeUnmount(() => {
     if (videoObserver) {
         videoObserver.disconnect();
         videoObserver = null;
     }
-    if (bgVideoRef.value) {
-        bgVideoRef.value.pause();
-        bgVideoRef.value.removeAttribute('src');
-        bgVideoRef.value.load();
+    if (themeClassObserver) {
+        themeClassObserver.disconnect();
+        themeClassObserver = null;
+    }
+    for (const vidEl of [bgVideoRef.value, bgVideoDarkRef.value]) {
+        if (vidEl) {
+            vidEl.pause();
+            vidEl.removeAttribute('src');
+            vidEl.load();
+        }
     }
 });
 
-// Sincronización en vivo con cambios en el inspector del maquetador
 watch(
-    () => [settings.value.bg_video, settings.value.bg_video_playback_rate, settings.value.bg_type],
-    ([newVideo, newRate, newType]) => {
+    () => [
+        settings.value.bg_video,
+        settings.value.bg_video_playback_rate,
+        settings.value.bg_type,
+        settings.value.bg_dark_mode,
+        settings.value.bg_video_dark,
+        settings.value.bg_video_playback_rate_dark,
+        settings.value.bg_type_dark,
+    ],
+    () => {
         if (typeof window === 'undefined') return;
-        if (newType === 'video' && bgVideoRef.value && newVideo) {
-            bgVideoRef.value.muted = true;
-            bgVideoRef.value.defaultMuted = true;
-            const rate = Number(newRate);
-            if (!isNaN(rate) && rate > 0) {
-                bgVideoRef.value.playbackRate = rate;
-            }
-            bgVideoRef.value.play().catch(() => {});
-        }
+        syncVideosByTheme();
     }
 );
 </script>
 
 <template>
-    <!-- Preload LCP de póster si la primera sección tiene vídeo de fondo -->
-    <Head v-if="hasBgVideo && effectivePosterUrl && isFirstSection">
+    <!-- Preload LCP optimizado para SSR y SEO (con aislamiento por esquema de color cuando hay fondos independientes) -->
+    <Head v-if="preloadEntries.length">
         <link
+            v-for="(entry, pIdx) in preloadEntries"
+            :key="`sec-preload-${section.id}-${pIdx}`"
             rel="preload"
             as="image"
-            :href="effectivePosterUrl"
-            fetchpriority="high"
-        />
-    </Head>
-    <!-- Preload LCP optimizado de la imagen de fondo con coincidencia exacta de media queries CSS para SSR y SEO -->
-    <Head v-else-if="bgUrls.desktop && isFirstSection">
-        <link
-            rel="preload"
-            as="image"
-            :href="bgUrls.mobile"
-            media="(max-width: 767px)"
-            fetchpriority="high"
-        />
-        <link
-            rel="preload"
-            as="image"
-            :href="bgUrls.tablet"
-            media="(min-width: 768px) and (max-width: 1023px)"
-            fetchpriority="high"
-        />
-        <link
-            rel="preload"
-            as="image"
-            :href="bgUrls.desktop"
-            media="(min-width: 1024px)"
+            :href="entry.href"
+            :media="entry.media"
             fetchpriority="high"
         />
     </Head>
@@ -737,12 +936,15 @@ watch(
         :data-cms-delay="(sectionAnimation !== 'none' && sectionAnimMode === 'block' && sectionDelay > 0) ? sectionDelay : undefined"
         v-bind="parsedCustomAttributes"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
-        <!-- Capa Dedicada de Vídeo de Fondo HTML5 Silenciado y en Bucle -->
+        <!-- Capa de Vídeo de Fondo (Modo Claro, o Compartida si bg_dark_mode !== 'custom') -->
         <div
-            v-if="hasBgVideo && normalizedBgVideoUrl"
-            class="absolute inset-0 z-0 overflow-hidden pointer-events-none builder-video-layer"
+            v-if="hasBgVideo"
+            :class="[
+                'absolute inset-0 z-0 overflow-hidden pointer-events-none builder-video-layer',
+                isCustomDarkBg ? 'builder-media-only-light' : ''
+            ]"
         >
             <video
                 ref="bgVideoRef"
@@ -761,7 +963,6 @@ watch(
                 :style="bgVideoPositionStyle"
             />
 
-            <!-- Fallback en smartphone si está configurado para ahorrar datos o en simulación móvil -->
             <div
                 v-if="effectivePosterUrl && (settings.bg_video_mobile === 'fallback' || vistaDispositivo === 'mobile')"
                 :class="[
@@ -772,20 +973,66 @@ watch(
             />
         </div>
 
-        <!-- Capa Dedicada de Imagen de Fondo (Con soporte 100% real para Parallax Fixed, Repetición Mosaico, Blend Modes y Filtros Visuales) -->
+        <!-- Capa de Vídeo de Fondo Exclusiva para Modo Oscuro (bg_dark_mode === 'custom') -->
         <div
-            v-if="!hasBgVideo && formattedBgImageUrl"
+            v-if="hasDarkBgVideo"
+            class="absolute inset-0 z-0 overflow-hidden pointer-events-none builder-video-layer builder-media-only-dark"
+        >
+            <video
+                ref="bgVideoDarkRef"
+                :src="normalizedDarkBgVideoUrl"
+                :poster="effectiveDarkPosterUrl || undefined"
+                autoplay
+                loop
+                muted
+                playsinline
+                webkit-playsinline
+                :preload="isFirstSection ? 'metadata' : 'none'"
+                :class="[
+                    'w-full h-full object-cover',
+                    settings.bg_video_mobile_dark === 'fallback' && (vistaDispositivo === 'mobile' ? 'hidden' : 'hidden md:block')
+                ]"
+                :style="darkBgVideoPositionStyle"
+            />
+
+            <div
+                v-if="effectiveDarkPosterUrl && (settings.bg_video_mobile_dark === 'fallback' || vistaDispositivo === 'mobile')"
+                :class="[
+                    'absolute inset-0 bg-cover bg-center',
+                    vistaDispositivo === 'mobile' ? 'block' : 'md:hidden'
+                ]"
+                :style="{ backgroundImage: `url(${effectiveDarkPosterUrl})` }"
+            />
+        </div>
+
+        <!-- Capa de Imagen de Fondo (Modo Claro, o Compartida si bg_dark_mode !== 'custom') -->
+        <div
+            v-if="hasLightBgImage"
             :class="[
                 'absolute inset-0 z-0 pointer-events-none builder-bg-layer',
-                bgHideMobileClass
+                bgHideMobileClass,
+                isCustomDarkBg ? 'builder-media-only-light' : ''
             ]"
             :style="bgImageLayerStyle"
         />
 
-        <!-- Overlay oscuro/claro personalizable (Capa intermedia z-[1] sobre el fondo y bajo el contenido z-10) -->
+        <!-- Capa de Imagen de Fondo Exclusiva para Modo Oscuro (bg_dark_mode === 'custom') -->
         <div
-            v-if="settings.bg_overlay"
-            class="absolute inset-0 z-[1] pointer-events-none"
+            v-if="hasDarkBgImage"
+            :class="[
+                'absolute inset-0 z-0 pointer-events-none builder-bg-layer builder-media-only-dark',
+                darkBgHideMobileClass
+            ]"
+            :style="darkBgImageLayerStyle"
+        />
+
+        <!-- Overlay oscuro/claro personalizable (Resuelto por variables CSS --sec-overlay-light / --sec-overlay-dark) -->
+        <div
+            v-if="hasAnyOverlay"
+            :class="[
+                'absolute inset-0 z-[1] pointer-events-none builder-overlay-layer',
+                overlayVisibilityClass
+            ]"
             :style="overlayStyle"
         />
 

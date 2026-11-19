@@ -91,6 +91,35 @@ class PageBuilderResolverService
                         unset($section['settings'][$emptyKey]);
                     }
                 }
+
+                // Si la sección hereda el fondo claro en modo oscuro, omitir propiedades exclusivas de modo oscuro en el payload público
+                if (($section['settings']['bg_dark_mode'] ?? 'inherit') !== 'custom') {
+                    unset(
+                        $section['settings']['bg_dark_mode'],
+                        $section['settings']['bg_type_dark'],
+                        $section['settings']['bg_image_dark'],
+                        $section['settings']['bg_image_mobile_dark'],
+                        $section['settings']['bg_size_dark'],
+                        $section['settings']['bg_position_dark'],
+                        $section['settings']['bg_size_tablet_dark'],
+                        $section['settings']['bg_position_tablet_dark'],
+                        $section['settings']['bg_size_mobile_dark'],
+                        $section['settings']['bg_position_mobile_dark'],
+                        $section['settings']['bg_attachment_dark'],
+                        $section['settings']['bg_repeat_dark'],
+                        $section['settings']['bg_blend_mode_dark'],
+                        $section['settings']['bg_filter_dark'],
+                        $section['settings']['bg_hide_mobile_dark'],
+                        $section['settings']['bg_video_dark'],
+                        $section['settings']['bg_video_poster_dark'],
+                        $section['settings']['bg_video_mobile_dark'],
+                        $section['settings']['bg_video_position_dark'],
+                        $section['settings']['bg_video_playback_rate_dark'],
+                        $section['settings']['bg_color_dark'],
+                        $section['settings']['bg_overlay_dark'],
+                        $section['settings']['text_color_dark']
+                    );
+                }
             }
 
             if (empty($section['rows']) || !is_array($section['rows'])) {

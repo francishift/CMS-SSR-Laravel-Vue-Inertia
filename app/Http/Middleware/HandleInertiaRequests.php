@@ -134,9 +134,10 @@ class HandleInertiaRequests extends Middleware
                     $s = $homepage?->layout_json['sections'][0]['settings'] ?? null;
                     if (!empty($s['transparent_header'])) {
                         return [
-                            'active'   => true,
-                            'pull'     => (bool) ($s['transparent_header_pull'] ?? false),
-                            'navColor' => $s['transparent_header_nav_color'] ?? 'inherit',
+                            'active'       => true,
+                            'pull'         => (bool) ($s['transparent_header_pull'] ?? false),
+                            'navColor'     => $s['transparent_header_nav_color'] ?? 'inherit',
+                            'navColorDark' => $s['transparent_header_nav_color_dark'] ?? 'same',
                         ];
                     }
                 }

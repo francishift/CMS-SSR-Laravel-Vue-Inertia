@@ -368,9 +368,10 @@ class PublicPageController extends Controller
         }
 
         return [
-            'active'   => true,
-            'pull'     => (bool) ($s['transparent_header_pull'] ?? false),
-            'navColor' => $s['transparent_header_nav_color'] ?? 'inherit',
+            'active'       => true,
+            'pull'         => (bool) ($s['transparent_header_pull'] ?? false),
+            'navColor'     => $s['transparent_header_nav_color'] ?? 'inherit',
+            'navColorDark' => $s['transparent_header_nav_color_dark'] ?? 'same',
         ];
     }
 

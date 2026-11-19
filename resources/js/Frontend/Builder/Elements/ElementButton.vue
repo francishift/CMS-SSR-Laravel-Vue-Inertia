@@ -7,7 +7,7 @@
  */
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useSanitize } from '@/Composables/useSanitize';
+import { useSanitize, sanitizeInlineCss } from '@/Composables/useSanitize';
 import { esNavegacionInertia } from '@/Composables/useUrlHelpers';
 import { useElementAnimation } from '@/Composables/useElementAnimation';
 
@@ -23,7 +23,7 @@ const { animAttrs, animStyle } = useElementAnimation(props);
 // Personalización avanzada
 const customId = computed(() => props.content?.element_id || undefined);
 const customClasses = computed(() => props.content?.custom_classes || '');
-const customCss = computed(() => props.content?.custom_css || '');
+const customCss = computed(() => sanitizeInlineCss(props.content?.custom_css || ''));
 
 const parsedCustomAttributes = computed(() => {
     const raw = props.content?.custom_attributes;
@@ -144,7 +144,7 @@ const marginBottomClass = computed(() => {
         :style="animStyle"
         v-bind="{ ...animAttrs, ...parsedCustomAttributes }"
     >
-        <component :is="'style'" v-if="customCss" v-text="customCss" />
+        <component :is="'style'" v-if="customCss" v-html="customCss" />
 
         <Link v-if="esSpa" :href="url" :class="buttonClasses" :style="buttonInlineStyle">
             <i v-if="icon && iconPosition === 'left'" :class="[icon, 'shrink-0']" />
