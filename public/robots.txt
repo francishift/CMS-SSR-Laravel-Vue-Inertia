@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /panel/
+Disallow: /login
+Disallow: /acceso
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /api/
+Disallow: /auth/
+Disallow: /whatsapp
+Disallow: /llamar
+Disallow: /telefono
+Disallow: /email
+Disallow: /mail
+Disallow: /download-vault/
+Allow: /
+
+Sitemap: https://tudominio.com/sitemap.xml

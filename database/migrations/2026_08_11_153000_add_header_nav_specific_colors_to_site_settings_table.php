@@ -1,0 +1,56 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('site_settings', function (Blueprint $table) {
+            if (!Schema::hasColumn('site_settings', 'header_nav_color_light')) {
+                $table->string('header_nav_color_light', 7)->nullable()->after('header_border_radius');
+            }
+            if (!Schema::hasColumn('site_settings', 'header_nav_hover_light')) {
+                $table->string('header_nav_hover_light', 7)->nullable()->after('header_nav_color_light');
+            }
+            if (!Schema::hasColumn('site_settings', 'header_nav_active_light')) {
+                $table->string('header_nav_active_light', 7)->nullable()->after('header_nav_hover_light');
+            }
+            if (!Schema::hasColumn('site_settings', 'header_nav_color_dark')) {
+                $table->string('header_nav_color_dark', 7)->nullable()->after('header_nav_active_light');
+            }
+            if (!Schema::hasColumn('site_settings', 'header_nav_hover_dark')) {
+                $table->string('header_nav_hover_dark', 7)->nullable()->after('header_nav_color_dark');
+            }
+            if (!Schema::hasColumn('site_settings', 'header_nav_active_dark')) {
+                $table->string('header_nav_active_dark', 7)->nullable()->after('header_nav_hover_dark');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('site_settings', function (Blueprint $table) {
+            foreach ([
+                'header_nav_color_light',
+                'header_nav_hover_light',
+                'header_nav_active_light',
+                'header_nav_color_dark',
+                'header_nav_hover_dark',
+                'header_nav_active_dark',
+            ] as $col) {
+                if (Schema::hasColumn('site_settings', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
+        });
+    }
+};

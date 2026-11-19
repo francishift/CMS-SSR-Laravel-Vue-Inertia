@@ -1,0 +1,58 @@
+# Historial de Versiones (Changelog)
+
+Todos los cambios notables de **CMS SSR (Laravel + Vue + Inertia)** se documentan en este archivo siguiendo [Semantic Versioning](https://semver.org/lang/es/).
+
+---
+
+## [Unreleased]
+
+### Nuevas Funcionalidades y Mejoras de UI / UX
+- **Control de Tamaño del Logotipo en Escritorio y Móvil (`logo_height` y `logo_height_mobile`)**:
+  - Nuevos deslizadores independientes en **Configuración → Identidad** (`16–100 px` escritorio y `16–64 px` móvil/cajón lateral) con previsualización en tiempo real para modo claro y oscuro.
+  - Inyección crítica SSR (`--logo-height` y `--logo-height-mobile`) sin saltos de layout (`CLS = 0`), alturas mínimas elásticas (`min-h-*`) en las 4 disposiciones de `PublicHeader` y reducción proporcional automática en modo `shrink_on_scroll`.
+- **Selector de Tamaño Visual del Título en Páginas Básicas (`title_size`)**:
+  - Permite elegir en `Paginas/Create` y `Paginas/Edit` la escala tipográfica visual (`OPCIONES_TAMANO_VISUAL`) para páginas estáticas sin Page Builder (ej. *Política de privacidad* y *Política de cookies*), conservando el `<h1>` semántico para SEO.
+
+### Correcciones y Seguridad CSP
+- **Sincronización Anti-FOUC de `frontend_default_theme` en `<head>` (`CspInlineScripts`)**:
+  - Añadidas las variantes `PUBLIC_THEME_USER_CHOICE_LIGHT`, `PUBLIC_THEME_USER_CHOICE_DARK` y `PUBLIC_THEME_USER_CHOICE_SYSTEM` junto con `CspInlineScripts::publicThemeScript()` y sus hashes `SHA-256` en `publicHashes()`, eliminando cualquier destello de tema en primeras visitas tanto en páginas públicas como en `404.blade.php`.
+- **Suite de Pruebas**: ampliada a **242 pruebas automatizadas (1.179 aserciones)**.
+
+---
+
+## [v2.0.0] — 2026-11-17
+
+### Nuevos Módulos y Funcionalidades Principales
+- **Módulo Autónomo de Descargas (`App\Modules\Downloads`)**:
+  - Arquitectura desacoplada y portable (`DownloadsServiceProvider`, contratos SOLID `DownloadSlugHandlerInterface` y `DownloadAccessStrategyInterface`), con visibilidad privada por defecto (`admin_only`) y preparada para monetización futura (`free`, `registered`, `paid`).
+  - **Bóveda Privada Segura (`DownloadVaultService`)**: almacenamiento aislado fuera de `public/` con extensión `.bin`, verificación real de *Magic Bytes* (`finfo`), inspección interna contra *Zip Slip* y *Zip Bombs*, y cálculo de huella `SHA-256`.
+  - **Entrega Firmada Anti-Hotlinking y Anti-Bots (`DownloadDeliveryService`)**: URLs firmadas efímeras ligadas a `IP + sesión`, redirección SEO ante enlaces externos (*hotlinking*), bloqueo de rastreadores automatizados en rutas binarias y soporte opcional `X-Accel-Redirect` (Nginx).
+  - **Integración Total con Page Builder**: maquetación visual en vivo tanto para la portada del catálogo como para la plantilla de ficha individual (`{download.*}`), bloque lateral fijo (`header + 20px`), secciones inferiores a ancho completo y reordenación Drag & Drop sincronizada con Redis.
+  - **SEO `SoftwareApplication` + `CollectionPage`**: grafo Schema.org JSON-LD enriquecido (`Offer`, `license`, `softwareRequirements`, `releaseNotes`), integración con menús y extensor automático de `sitemap.xml`.
+- **Centro de Actividad, Telemetría IP y Auditoría (`spatie/laravel-activitylog` v5.1)**:
+  - Panel exclusivo para administradores (`/panel/actividad`) combinando telemetría de direcciones IP de descargas (con históricos perpetuos globales y por recurso inmunes a limpiezas) y auditoría administrativa con comparador *Antes vs Después* e inicios/fallos de sesión.
+  - Purgado manual selectivo y tareas programadas diarias (`model:prune` y `activitylog:clean`).
+- **Módulo de Formularios Dinámicos, Mapas Duales y Autenticación Google OAuth**:
+  - Constructor de formularios incrustables en Page Builder con bandeja de envíos, notificaciones de correo y protección anti-spam Cloudflare Turnstile.
+  - Elementos geoespaciales con carga diferida para Leaflet (OpenStreetMap) y Google Maps (API Key cifrada `AES-256` en base de datos).
+  - Inicio de sesión opcional con Google OAuth (`laravel/socialite`) y copias de seguridad automatizadas hacia Google Drive (`spatie/laravel-backup`).
+
+### Seguridad, Rendimiento y SEO Técnico
+- **Actualización de Stack a PHP 8.4+, Laravel 13.x, Vite 8 y Vue 3.5+**:
+  - Compatibilidad SSR completa con `@vue/server-renderer >= 3.5.40` e `@inertiajs/vue3` v2 sin fugas de memoria.
+  - Separación de bundle JS público (~190 KB menos de JS al cargar `PrimeVue` y `Ziggy` bajo demanda solo en administración).
+- **Cabeceras HTTP de Seguridad A+ y Content Security Policy (CSP) Híbrida**:
+  - Middleware global `SecurityHeaders` con hashes criptográficos `SHA-256` estáticos para páginas públicas en Redis RAM y `nonces` dinámicos en rutas privadas, eliminando `'unsafe-inline'` en `script-src`.
+- **Caché Redis de Respuesta Completa (`PublicResponseCache`) Mejorada**:
+  - Normalización automática de parámetros de campañas publicitarias (`utm_*`, `fbclid`, `gclid`, `srsltid`) para máxima tasa de acierto en RAM (`< 0.5 ms`) y TTL dinámico sensible a publicaciones programadas.
+- **Blindaje SEO Canónico y Grafo `@graph` Unificado**:
+  - Eliminación de URLs duplicadas en paginación y categorías mediante redirecciones `301`, soporte completo de `meta_robots` por entidad, atributos `nofollow` en menús y escudo anti-scraping en canales nativos de contacto (`/whatsapp`, `/llamar`, `/email`).
+- **Suite de Pruebas Ampliada**:
+  - Cobertura ampliada a **237 pruebas automatizadas (1.118 aserciones)** en PHPUnit 12.
+
+---
+
+## [v1.0.0] — Lanzamiento Inicial
+
+- Arquitectura base **CMS SSR** con Laravel 13, Vue 3, Inertia.js v2, Tailwind CSS v4 y PrimeVue v4.
+- Gestión de Usuarios y Roles (`spatie/laravel-permission`), Categorías con campos extra, Artículos programables, Páginas estáticas, Menús, Biblioteca de Medios con optimización WebP y primera versión del Constructor Visual (Page Builder).

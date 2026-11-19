@@ -1,0 +1,1176 @@
+@import 'primeicons/primeicons.css';
+
+/* Forzar font-display: swap en PrimeIcons para evitar bloqueo de renderizado en Lighthouse */
+@font-face {
+    font-family: 'primeicons';
+    font-display: swap;
+    src: url('primeicons/fonts/primeicons.woff2') format('woff2'),
+         url('primeicons/fonts/primeicons.woff') format('woff'),
+         url('primeicons/fonts/primeicons.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Fuentes locales auto-hospedadas (GDPR-compliant) — Pesos esenciales optimizados */
+/* hanken-grotesk */
+@import '@fontsource/hanken-grotesk/400.css';
+@import '@fontsource/hanken-grotesk/600.css';
+@import '@fontsource/hanken-grotesk/700.css';
+@import '@fontsource/hanken-grotesk/800.css';
+/* inter */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/inter/800.css';
+/* lato */
+@import '@fontsource/lato/400.css';
+@import '@fontsource/lato/700.css';
+/* plus-jakarta-sans */
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/plus-jakarta-sans/800.css';
+/* outfit */
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
+@import '@fontsource/outfit/800.css';
+/* roboto */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/700.css';
+/* lora */
+@import '@fontsource/lora/400.css';
+@import '@fontsource/lora/600.css';
+@import '@fontsource/lora/700.css';
+/* playfair-display */
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/700.css';
+/* open-sans */
+@import '@fontsource/open-sans/400.css';
+@import '@fontsource/open-sans/600.css';
+@import '@fontsource/open-sans/700.css';
+@import '@fontsource/open-sans/800.css';
+
+@import 'tailwindcss';
+
+/* Asegurar aislamiento y prioridad absoluta de la fuente PrimeIcons */
+.pi, [class^="pi-"], [class*=" pi-"] {
+    font-family: 'primeicons' !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1;
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: var(--body-font, 'Hanken Grotesk', system-ui, sans-serif);
+    --font-heading: var(--heading-font, 'Hanken Grotesk', system-ui, sans-serif);
+    --color-primary: var(--primary-color, #10b981);
+    --color-secondary: var(--secondary-color, #6366f1);
+    --color-accent: var(--accent-color, #f59e0b);
+}
+
+:root {
+    --primary-color: #10b981;
+    --secondary-color: #6366f1;
+    --accent-color: #f59e0b;
+    --link-color: #10b981;
+    --link-hover-color: #059669;
+    --link-color-dark: #d4d4d8;
+    --link-hover-color-dark: #ffffff;
+    --heading-font: 'Hanken Grotesk', system-ui, sans-serif;
+    --body-font: 'Hanken Grotesk', system-ui, sans-serif;
+
+    /* Fondo, Imagen/Gradiente y texto general del sitio web */
+    --site-bg: var(--bg-color-light, #ffffff);
+    --site-bg-image: var(--bg-image-light, none);
+    --site-text: var(--text-color-light, #18181b);
+
+    /* Variables de Botones Primarios y Secundarios (Modo Claro) */
+    --btn-primary-bg: var(--button-primary-bg, #10b981);
+    --btn-primary-text: var(--button-primary-text, #ffffff);
+    --btn-secondary-bg: var(--button-secondary-bg, #6366f1);
+    --btn-secondary-text: var(--button-secondary-text, #ffffff);
+
+    /* Tipografía por defecto de encabezados (sobreescrita dinámicamente por PublicLayout) */
+    --hero_2xl-size: 4.5rem;
+    --hero_2xl-font-weight: 800;
+    --hero_2xl-letter-spacing: -0.03em;
+    --hero_2xl-line-height: 1.05;
+
+    --hero_xl-size: 3.75rem;
+    --hero_xl-font-weight: 800;
+    --hero_xl-letter-spacing: -0.025em;
+    --hero_xl-line-height: 1.1;
+
+    --h1-size: 3rem;
+    --h1-font-weight: 800;
+    --h1-letter-spacing: -0.025em;
+    --h1-line-height: 1.1;
+
+    --h2-size: 2.25rem;
+    --h2-font-weight: 700;
+    --h2-letter-spacing: -0.02em;
+    --h2-line-height: 1.2;
+
+    --h3-size: 1.875rem;
+    --h3-font-weight: 600;
+    --h3-letter-spacing: 0em;
+    --h3-line-height: 1.25;
+
+    --h4-size: 1.25rem;
+    --h4-font-weight: 600;
+    --h4-letter-spacing: 0em;
+    --h4-line-height: 1.35;
+
+    --h5-size: 1rem;
+    --h5-font-weight: 500;
+    --h5-letter-spacing: 0.025em;
+    --h5-line-height: 1.4;
+
+    --h6-size: 0.75rem;
+    --h6-font-weight: 500;
+    --h6-letter-spacing: 0.05em;
+    --h6-line-height: 1.5;
+}
+
+/* Reglas de encabezados globales sincronizadas dinámicamente con SiteSettings */
+h1 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h1-font-weight, 800);
+    letter-spacing: var(--h1-letter-spacing, -0.025em);
+    line-height: var(--h1-line-height, 1.1);
+}
+h2 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h2-font-weight, 700);
+    letter-spacing: var(--h2-letter-spacing, -0.02em);
+    line-height: var(--h2-line-height, 1.2);
+}
+h3 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h3-font-weight, 600);
+    letter-spacing: var(--h3-letter-spacing, 0em);
+    line-height: var(--h3-line-height, 1.25);
+}
+h4 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h4-font-weight, 600);
+    letter-spacing: var(--h4-letter-spacing, 0em);
+    line-height: var(--h4-line-height, 1.35);
+}
+h5 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h5-font-weight, 500);
+    letter-spacing: var(--h5-letter-spacing, 0.025em);
+    line-height: var(--h5-line-height, 1.4);
+}
+h6 {
+    font-family: var(--heading-font), system-ui, sans-serif;
+    font-weight: var(--h6-font-weight, 500);
+    letter-spacing: var(--h6-letter-spacing, 0.05em);
+    line-height: var(--h6-line-height, 1.5);
+}
+
+/* Reglas de Modo Oscuro para Fondo, Imagen, Texto y Botones */
+.dark,
+html.dark {
+    --site-bg: var(--bg-color-dark, #09090b);
+    --site-bg-image: var(--bg-image-dark, none);
+    --site-text: var(--text-color-dark, #f4f4f5);
+    --btn-primary-bg: var(--button-primary-bg-dark, var(--button-primary-bg, #10b981));
+    --btn-primary-text: var(--button-primary-text-dark, var(--button-primary-text, #ffffff));
+    --btn-secondary-bg: var(--button-secondary-bg-dark, var(--button-secondary-bg, #27272a));
+    --btn-secondary-text: var(--button-secondary-text-dark, var(--button-secondary-text, #ffffff));
+}
+
+html:has(.public-site),
+body:has(.public-site) {
+    background-color: var(--site-bg) !important;
+    color: var(--site-text) !important;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+.public-site {
+    background-color: var(--site-bg) !important;
+    color: var(--site-text) !important;
+    position: relative;
+    z-index: 0;
+}
+
+/* Reglas de filtrado y dimensiones dinámicas para logotipo público y en previsualizador del Builder */
+.site-logo {
+    filter: var(--logo-filter, none);
+    height: var(--logo-height-mobile, 32px);
+    width: auto;
+}
+@media (min-width: 768px) {
+    .site-logo {
+        height: var(--logo-height, 36px);
+    }
+}
+.site-logo.site-logo-drawer {
+    height: var(--logo-height-mobile, 32px) !important;
+}
+.header-scrolled.header-shrink .site-logo:not(.site-logo-drawer) {
+    height: calc(var(--logo-height-mobile, 32px) * 0.85);
+}
+@media (min-width: 768px) {
+    .header-scrolled.header-shrink .site-logo:not(.site-logo-drawer) {
+        height: calc(var(--logo-height, 36px) * 0.82);
+    }
+}
+.dark .site-logo,
+.preview-container-root.dark .site-logo,
+.public-site.dark .site-logo,
+.dark .public-site .site-logo {
+    filter: var(--logo-dark-filter, none);
+}
+
+/* Capa de Fondo Fijo para Gradientes y Background Image (Fix para Móviles y Páginas Largas) */
+.public-site::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh; /* lvh = largest viewport height: cubre overscroll de Safari iOS */
+    background-image: var(--site-bg-image);
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: 100vw 100lvh !important;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Color global de los enlaces hipervínculo del contenido general (respetando colores explícitos de secciones y elementos) */
+.public-site a:not([class*="bg-"]):not([class*="btn"]):not([class*="button"]):not(.p-button):not([role="button"]):not(.no-link-style):not(.header-nav-link):not([class*="text-"]) {
+    color: var(--link-color, var(--primary-color, #10b981));
+    transition: color 0.15s ease-in-out;
+}
+
+.public-site a:not([class*="bg-"]):not([class*="btn"]):not([class*="button"]):not(.p-button):not([role="button"]):not(.no-link-style):not(.header-nav-link):not([class*="text-"]):hover {
+    color: var(--link-hover-color, #059669);
+}
+
+.dark .public-site a:not([class*="bg-"]):not([class*="btn"]):not([class*="button"]):not(.p-button):not([role="button"]):not(.no-link-style):not(.header-nav-link):not([class*="text-"]) {
+    color: var(--link-color-dark, #d4d4d8);
+}
+
+.dark .public-site a:not([class*="bg-"]):not([class*="btn"]):not([class*="button"]):not(.p-button):not([role="button"]):not(.no-link-style):not(.header-nav-link):not([class*="text-"]):hover {
+    color: var(--link-hover-color-dark, #ffffff);
+}
+
+/* Enlaces del Menú de Cabecera (Header Navigation Menu Links) */
+header .header-nav-link,
+.header-nav-link {
+    color: var(--header-nav-color-light, #3f3f46) !important;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+header .header-nav-link:hover,
+header .group:hover > .header-nav-link,
+.header-nav-link:hover {
+    color: var(--header-nav-hover-light, #18181b) !important;
+}
+
+.dark header .header-nav-link,
+.dark .header-nav-link {
+    color: var(--header-nav-color-dark, #d4d4d8) !important;
+}
+
+.dark header .header-nav-link:hover,
+.dark header .group:hover > .header-nav-link,
+.dark .header-nav-link:hover {
+    color: var(--header-nav-hover-dark, #ffffff) !important;
+}
+
+/* Estado Activo de la Cabecera */
+header .header-nav-link-active,
+.header-nav-link-active {
+    color: var(--header-nav-active-light, var(--primary-color, #10b981)) !important;
+}
+
+.dark header .header-nav-link-active,
+.dark .header-nav-link-active {
+    color: var(--header-nav-active-dark, var(--primary-color, #10b981)) !important;
+}
+
+.dark header .header-nav-link-active:hover,
+.dark .header-nav-link-active:hover {
+    color: var(--header-nav-hover-dark, #ffffff) !important;
+}
+
+/* Modos de contraste para Cabecera Transparente en Secciones */
+header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light,
+header:not(.header-scrolled) .header-nav-contrast-light {
+    color: #ffffff !important;
+}
+header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-light:hover,
+header:not(.header-scrolled) .header-nav-contrast-light:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark,
+header:not(.header-scrolled) .header-nav-contrast-dark {
+    color: #18181b !important;
+}
+header.header-transparent-section:not(.header-scrolled) .header-nav-contrast-dark:hover,
+header:not(.header-scrolled) .header-nav-contrast-dark:hover {
+    color: rgba(24, 24, 27, 0.75) !important;
+}
+
+/* ==========================================================================
+   Soporte Responsivo Nativo para Imagen de Fondo de Sección (Móvil / Tablet / PC)
+   ========================================================================== */
+.builder-bg-layer {
+    background-image: var(--bg-url-mob, var(--bg-url-desk));
+    background-size: var(--bg-sz-mob, var(--bg-sz-desk, cover));
+    background-position: var(--bg-pos-mob, var(--bg-pos-desk, center center));
+}
+
+@media (min-width: 768px) {
+    .builder-bg-layer {
+        background-image: var(--bg-url-tab, var(--bg-url-desk));
+        background-size: var(--bg-sz-tab, var(--bg-sz-desk, cover));
+        background-position: var(--bg-pos-tab, var(--bg-pos-desk, center center));
+    }
+}
+
+@media (min-width: 1024px) {
+    .builder-bg-layer {
+        background-image: var(--bg-url-desk);
+        background-size: var(--bg-sz-desk, cover);
+        background-position: var(--bg-pos-desk, center center);
+    }
+}
+
+
+/* ==========================================================================
+   Enlaces en Texto Crudo y Contenido Enriquecido (Prose, WYSIWYG, HTML, Texto)
+   Aplica ÚNICAMENTE al texto libre y NO a componentes de UI (paginación, botones, etc.)
+   ========================================================================== */
+.prose a,
+.wysiwyg-content a,
+.raw-html-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]),
+.builder-text-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]) {
+    color: var(--link-color, var(--primary-color, #10b981)) !important;
+    font-weight: var(--link-font-weight, inherit);
+    text-decoration: var(--link-decoration, none) var(--link-underline-style, solid) !important;
+    text-underline-offset: var(--link-underline-offset, auto) !important;
+    transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+
+.prose a:hover,
+.wysiwyg-content a:hover,
+.raw-html-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]):hover,
+.builder-text-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]):hover {
+    color: var(--link-hover-color, #059669) !important;
+    text-decoration: var(--link-hover-decoration, underline) var(--link-underline-style, solid) !important;
+    text-underline-offset: var(--link-underline-offset, auto) !important;
+}
+
+.dark .prose a,
+.dark .wysiwyg-content a,
+.dark .raw-html-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]),
+.dark .builder-text-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]) {
+    color: var(--link-color-dark, #d4d4d8) !important;
+}
+
+.dark .prose a:hover,
+.dark .wysiwyg-content a:hover,
+.dark .raw-html-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]):hover,
+.dark .builder-text-element a:not([class*="btn"]):not([class*="button"]):not([class*="no-custom-link"]):not([class*="no-underline"]):not([class*="underline"]):hover {
+    color: var(--link-hover-color-dark, #ffffff) !important;
+}
+
+body,
+.public-site {
+    font-family: var(--body-font), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: var(--body-font-size, 1rem);
+    font-weight: var(--body-font-weight, 400);
+    line-height: var(--body-line-height, 1.625);
+    letter-spacing: var(--body-letter-spacing, 0em);
+}
+
+/* El texto de párrafos y contenido respeta las variables globales de tipografía si no tiene override específico */
+.public-site p,
+.prose p,
+.builder-text-element p,
+article p,
+.wysiwyg-content p {
+    font-size: var(--body-font-size, 1rem);
+    font-weight: var(--body-font-weight, 400);
+    line-height: var(--body-line-height, 1.625);
+    letter-spacing: var(--body-letter-spacing, 0em);
+}
+
+/* Tipografía base de encabezados (fuente, anti-hifenación) */
+h1, h2, h3, h4, h5, h6, .font-heading, .article-title, .builder-heading, .prose h1, .prose h2, .prose h3 {
+    font-family: var(--heading-font), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+    -ms-hyphens: none !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+}
+
+/* Color de texto forzado en secciones del maquetador (Claro / Oscuro) */
+.section-text-light,
+.section-text-light h1,
+.section-text-light h2,
+.section-text-light h3,
+.section-text-light h4,
+.section-text-light h5,
+.section-text-light h6,
+.section-text-light p,
+.section-text-light span:not(.p-button-label):not(.pi),
+.section-text-light div:not(.p-button),
+.section-text-light li,
+.section-text-light label {
+    color: #ffffff !important;
+}
+
+.section-text-dark,
+.section-text-dark h1,
+.section-text-dark h2,
+.section-text-dark h3,
+.section-text-dark h4,
+.section-text-dark h5,
+.section-text-dark h6,
+.section-text-dark p,
+.section-text-dark span:not(.p-button-label):not(.pi),
+.section-text-dark div:not(.p-button),
+.section-text-dark li,
+.section-text-dark label {
+    color: #18181b !important;
+}
+
+/* Tamaños, peso, letter-spacing y line-height por nivel en la vista pública y maquetador (configurables desde el panel) */
+.public-site h1, .prose h1, article h1, .public-page h1, .builder-h1 {
+    font-size: var(--h1-size, 3rem);
+    font-weight: var(--h1-font-weight, 800);
+    letter-spacing: var(--h1-letter-spacing, -0.025em);
+    line-height: var(--h1-line-height, 1.1);
+}
+.public-site h2, .prose h2, article h2, .public-page h2, .builder-h2 {
+    font-size: var(--h2-size, 2.25rem);
+    font-weight: var(--h2-font-weight, 700);
+    letter-spacing: var(--h2-letter-spacing, -0.02em);
+    line-height: var(--h2-line-height, 1.2);
+}
+.public-site h3, .prose h3, article h3, .public-page h3, .builder-h3 {
+    font-size: var(--h3-size, 1.875rem);
+    font-weight: var(--h3-font-weight, 600);
+    letter-spacing: var(--h3-letter-spacing, 0em);
+    line-height: var(--h3-line-height, 1.25);
+}
+.public-site h4, .prose h4, article h4, .public-page h4, .builder-h4 {
+    font-size: var(--h4-size, 1.25rem);
+    font-weight: var(--h4-font-weight, 600);
+    letter-spacing: var(--h4-letter-spacing, 0em);
+    line-height: var(--h4-line-height, 1.35);
+}
+.public-site h5, .prose h5, article h5, .public-page h5, .builder-h5 {
+    font-size: var(--h5-size, 1.125rem);
+    font-weight: var(--h5-font-weight, 600);
+    letter-spacing: var(--h5-letter-spacing, 0em);
+    line-height: var(--h5-line-height, 1.4);
+}
+.public-site h6, .prose h6, article h6, .public-page h6, .builder-h6 {
+    font-size: var(--h6-size, 1rem);
+    font-weight: var(--h6-font-weight, 600);
+    letter-spacing: var(--h6-letter-spacing, 0em);
+    line-height: var(--h6-line-height, 1.4);
+}
+.builder-hero_2xl {
+    font-size: var(--hero_2xl-size, 4.5rem);
+    font-weight: var(--hero_2xl-font-weight, 800);
+    letter-spacing: var(--hero_2xl-letter-spacing, -0.03em);
+    line-height: var(--hero_2xl-line-height, 1.05);
+}
+.builder-hero_xl {
+    font-size: var(--hero_xl-size, 3.75rem);
+    font-weight: var(--hero_xl-font-weight, 800);
+    letter-spacing: var(--hero_xl-letter-spacing, -0.025em);
+    line-height: var(--hero_xl-line-height, 1.1);
+}
+
+/* Reset de encabezados en el panel de administración (respetan clases de utilidades Tailwind text-xl, text-2xl, etc.) */
+.admin-layout h1, .admin-panel h1 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+.admin-layout h2, .admin-panel h2 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+.admin-layout h3, .admin-panel h3 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+.admin-layout h4, .admin-panel h4 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+.admin-layout h5, .admin-panel h5 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+.admin-layout h6, .admin-panel h6 { font-size: inherit; letter-spacing: inherit; line-height: inherit; }
+
+/* Corrección Global e Inviolable para Buscadores con Icono en el Panel Admin */
+.p-inputtext.pl-8,
+.p-inputtext.pl-9,
+.p-inputtext.pl-10,
+.p-inputtext.pl-12,
+.p-inputtext.\!pl-8,
+.p-inputtext.\!pl-9,
+.p-inputtext.\!pl-10,
+.p-inputtext.\!pl-12,
+.p-iconfield .p-inputtext,
+.relative > .pi-search ~ .p-inputtext,
+.relative > i.pi-search ~ .p-inputtext,
+.relative > i.pi ~ .p-inputtext,
+.relative > i ~ .p-inputtext {
+    padding-left: 2.75rem !important;
+}
+
+/* Posición fija y centrado matemático perfecto del icono en buscadores */
+.p-iconfield .p-inputicon,
+.p-iconfield .p-inputicon:first-child,
+.relative:has(> input, > .p-inputtext) > i.pi-search,
+.relative:has(> input, > .p-inputtext) > i.pi {
+    position: absolute !important;
+    left: 0.85rem !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+}
+
+/* Utilidades dinámicas de color corporativo */
+.bg-primary {
+    background-color: var(--primary-color, #10b981) !important;
+}
+.text-primary {
+    color: var(--primary-color, #10b981) !important;
+}
+.border-primary {
+    border-color: var(--primary-color, #10b981) !important;
+}
+
+/* Estilos de Toast personalizables de altísimo nivel (Sleek Dark Glassmorphism) */
+.p-toast {
+    font-family: var(--font-sans);
+    max-width: 420px;
+    width: calc(100vw - 2rem);
+}
+
+.p-toast-message {
+    border-radius: 0.75rem !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* Success Toast */
+.p-toast-message-success {
+    background: #09090b !important;
+    border-left: 4px solid #10b981 !important;
+    border: 1px solid #27272a !important;
+    border-left-width: 4px !important;
+}
+.p-toast-message-success .p-toast-message-icon {
+    color: #34d399 !important;
+}
+
+/* Error Toast */
+.p-toast-message-error {
+    background: #09090b !important;
+    border-left: 4px solid #f43f5e !important;
+    border: 1px solid #27272a !important;
+    border-left-width: 4px !important;
+}
+.p-toast-message-error .p-toast-message-icon {
+    color: #fb7185 !important;
+}
+
+/* Info Toast */
+.p-toast-message-info {
+    background: #09090b !important;
+    border-left: 4px solid #3b82f6 !important;
+    border: 1px solid #27272a !important;
+    border-left-width: 4px !important;
+}
+.p-toast-message-info .p-toast-message-icon {
+    color: #60a5fa !important;
+}
+
+/* Warn Toast */
+.p-toast-message-warn {
+    background: #09090b !important;
+    border-left: 4px solid #f59e0b !important;
+    border: 1px solid #27272a !important;
+    border-left-width: 4px !important;
+}
+.p-toast-message-warn .p-toast-message-icon {
+    color: #fbbf24 !important;
+}
+
+/* Forzar texto en blanco puro y alto contraste en el contenido del Toast */
+.p-toast-message .p-toast-summary {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
+
+.p-toast-message .p-toast-detail {
+    color: #f4f4f5 !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.25rem !important;
+}
+
+.p-toast-message .p-toast-close-button {
+    color: #a1a1aa !important;
+}
+.p-toast-message .p-toast-close-button:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ─── Tipografía de Contenido HTML (Páginas, Artículos y Editor) ──── */
+/* Hereda los estilos del body configurados desde el panel (Configuración → Tipografía) */
+.prose,
+.ql-editor {
+    line-height: var(--body-line-height, 1.625);
+    font-size: var(--body-font-size, 1rem);
+    font-weight: var(--body-font-weight, 400);
+    letter-spacing: var(--body-letter-spacing, 0em);
+}
+
+.prose h1,
+.ql-editor h1 {
+    font-size: 2.25rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+    margin-top: 1.75rem !important;
+    margin-bottom: 1rem !important;
+    color: inherit;
+}
+
+.prose h2,
+.ql-editor h2 {
+    font-size: 1.75rem !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+    color: inherit;
+}
+
+.prose h3,
+.ql-editor h3 {
+    font-size: 1.35rem !important;
+    line-height: 1.35 !important;
+    font-weight: 600 !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+    color: inherit;
+}
+
+.prose h4,
+.ql-editor h4 {
+    font-size: 1.15rem !important;
+    line-height: 1.4 !important;
+    font-weight: 600 !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
+    color: inherit;
+}
+
+.prose p,
+.ql-editor p {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.prose ul,
+.ql-editor ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.prose ol,
+.ql-editor ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.p-confirm-dialog .p-dialog-content {
+    padding-top: 1rem !important;
+}
+
+/* Escala tipográfica universal para encabezados del maquetador visual (H1 - H6), HTML Libre y bloques .prose */
+.builder-h1, .prose .builder-h1 { font-size: var(--h1-size, 3rem) !important; line-height: var(--h1-line-height, 1.1) !important; font-weight: var(--h1-font-weight, 800) !important; letter-spacing: var(--h1-letter-spacing, -0.025em) !important; }
+.builder-h2, .prose .builder-h2 { font-size: var(--h2-size, 2.25rem) !important; line-height: var(--h2-line-height, 1.2) !important; font-weight: var(--h2-font-weight, 700) !important; letter-spacing: var(--h2-letter-spacing, -0.02em) !important; }
+.builder-h3, .prose .builder-h3 { font-size: var(--h3-size, 1.875rem) !important; line-height: var(--h3-line-height, 1.25) !important; font-weight: var(--h3-font-weight, 600) !important; letter-spacing: var(--h3-letter-spacing, 0em) !important; }
+.builder-h4, .prose .builder-h4 { font-size: var(--h4-size, 1.25rem) !important; line-height: var(--h4-line-height, 1.35) !important; font-weight: var(--h4-font-weight, 600) !important; letter-spacing: var(--h4-letter-spacing, 0em) !important; }
+.builder-h5, .prose .builder-h5 { font-size: var(--h5-size, 1.125rem) !important; line-height: var(--h5-line-height, 1.4) !important; font-weight: var(--h5-font-weight, 600) !important; letter-spacing: var(--h5-letter-spacing, 0em) !important; }
+.builder-h6, .prose .builder-h6 { font-size: var(--h6-size, 1rem) !important; line-height: var(--h6-line-height, 1.4) !important; font-weight: var(--h6-font-weight, 600) !important; letter-spacing: var(--h6-letter-spacing, 0em) !important; }
+
+/* Soporte de Container Queries para el maquetador visual responsivo en vivo */
+.preview-container-root {
+    container-type: inline-size;
+    position: relative;
+    z-index: 0;
+    --site-bg: var(--bg-color-light, #ffffff);
+    --site-bg-image: var(--bg-image-light, none);
+    --site-text: var(--text-color-light, #18181b);
+    --btn-primary-bg: var(--button-primary-bg, var(--primary-color, #10b981));
+    --btn-primary-text: var(--button-primary-text, #ffffff);
+    --btn-secondary-bg: var(--button-secondary-bg, var(--secondary-color, #6366f1));
+    --btn-secondary-text: var(--button-secondary-text, #ffffff);
+}
+
+.dark .preview-container-root {
+    --site-bg: var(--bg-color-dark, #09090b);
+    --site-bg-image: var(--bg-image-dark, none);
+    --site-text: var(--text-color-dark, #f4f4f5);
+    --btn-primary-bg: var(--button-primary-bg-dark, var(--button-primary-bg, var(--primary-color, #10b981)));
+    --btn-primary-text: var(--button-primary-text-dark, var(--button-primary-text, #ffffff));
+    --btn-secondary-bg: var(--button-secondary-bg-dark, var(--button-secondary-bg, #27272a));
+    --btn-secondary-text: var(--button-secondary-text-dark, var(--button-secondary-text, #ffffff));
+}
+
+.preview-container-root::before {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: inherit;
+}
+
+@container (max-width: 639px) {
+    .builder-row-grid.cols-mob-1,
+    .builder-element-grid.cols-mob-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+    .builder-row-grid.cols-mob-1 > * {
+        grid-column: span 1 / span 1 !important;
+    }
+    .builder-row-grid.cols-mob-2,
+    .builder-element-grid.cols-mob-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@container (min-width: 640px) and (max-width: 1023px) {
+    .builder-row-grid.cols-tab-1,
+    .builder-element-grid.cols-tab-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+    .builder-row-grid.cols-tab-1 > * {
+        grid-column: span 1 / span 1 !important;
+    }
+    .builder-row-grid.cols-tab-2,
+    .builder-element-grid.cols-tab-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .builder-row-grid.cols-tab-3,
+    .builder-element-grid.cols-tab-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    .builder-element-grid.cols-tab-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+.prose blockquote,
+.ql-editor blockquote {
+    border-left: 4px solid #10b981 !important;
+    padding-left: 1rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+    font-style: italic !important;
+    opacity: 0.9;
+}
+
+/* Estilos globales ultra-compactos para Tooltips de PrimeVue */
+.p-tooltip {
+    font-family: var(--font-sans) !important;
+}
+
+.p-tooltip .p-tooltip-text {
+    font-size: 12px !important;
+    line-height: 14px !important;
+    padding: 5px 9px !important;
+    border-radius: 5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ==========================================================================
+   Estilos de Alta Densidad y Tamaño de Fuente Compacto para el Builder Sidebar
+   ========================================================================== */
+.builder-sidebar {
+    font-size: 11px;
+}
+
+/* Reducción refinada de etiquetas y textos de formulario en el Inspector */
+.builder-sidebar label,
+.builder-sidebar .text-xs,
+.builder-sidebar .text-\[11px\] {
+    font-size: 11px !important;
+    letter-spacing: -0.01em;
+}
+
+.builder-sidebar label {
+    font-weight: 600 !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Entradas de texto, Selects y Textareas ultra-compactos */
+.builder-sidebar .p-inputtext,
+.builder-sidebar .p-select,
+.builder-sidebar .p-textarea,
+.builder-sidebar .p-inputnumber-input {
+    font-size: 11px !important;
+    padding: 0.3rem 0.5rem !important;
+    border-radius: 0.5rem !important;
+    line-height: 1.3 !important;
+    min-height: 1.85rem !important;
+}
+
+.builder-sidebar .p-select .p-select-label {
+    font-size: 11px !important;
+    padding: 0.3rem 0.5rem !important;
+    line-height: 1.3 !important;
+}
+
+.builder-sidebar .p-select-dropdown {
+    width: 1.5rem !important;
+}
+
+/* Menú desplegable de opciones de Selects PrimeVue */
+.p-select-option {
+    font-size: 11px !important;
+    padding: 0.3rem 0.55rem !important;
+    line-height: 1.25 !important;
+}
+
+.p-select-list {
+    padding: 0.2rem !important;
+}
+
+/* Botones y títulos de secciones dentro del Inspector */
+.builder-sidebar h3,
+.builder-sidebar h4,
+.builder-sidebar .text-sm {
+    font-size: 11.5px !important;
+}
+
+.builder-sidebar .p-button {
+    font-size: 11px !important;
+    padding: 0.3rem 0.6rem !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Ocultar scrollbar pero mantener scroll funcional (tabs móviles) */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* ==========================================================================
+   Motor de Animaciones al Scroll de Alto Rendimiento
+   Hardware-accelerated con CSS 3D transforms y 0% de sobrecarga en CPU
+   ========================================================================== */
+
+/* Estado base oculto antes de entrar en viewport (sin transicion para snap inmediato) */
+[data-cms-animate]:not(.cms-animated) {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: none !important;
+    will-change: opacity, transform;
+}
+
+[data-cms-animate="fade"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: none !important;
+}
+
+[data-cms-animate="scale_up"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: scale(0.85) !important;
+}
+
+[data-cms-animate="scale_down"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: scale(1.15) !important;
+}
+
+/* Deslizar Corto (30px) */
+[data-cms-animate="slide_top_small"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, 30px, 0) !important;
+}
+
+[data-cms-animate="slide_bottom_small"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, -30px, 0) !important;
+}
+
+[data-cms-animate="slide_left_small"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(30px, 0, 0) !important;
+}
+
+[data-cms-animate="slide_right_small"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(-30px, 0, 0) !important;
+}
+
+/* Deslizar Mediano (70px) */
+[data-cms-animate="slide_top_medium"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, 70px, 0) !important;
+}
+
+[data-cms-animate="slide_bottom_medium"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, -70px, 0) !important;
+}
+
+[data-cms-animate="slide_left_medium"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(70px, 0, 0) !important;
+}
+
+[data-cms-animate="slide_right_medium"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(-70px, 0, 0) !important;
+}
+
+/* Deslizar 100% */
+[data-cms-animate="slide_top_100"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, 100%, 0) !important;
+}
+
+[data-cms-animate="slide_bottom_100"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(0, -100%, 0) !important;
+}
+
+[data-cms-animate="slide_left_100"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(100%, 0, 0) !important;
+}
+
+[data-cms-animate="slide_right_100"]:not(.cms-animated) {
+    opacity: 0 !important;
+    transform: translate3d(-100%, 0, 0) !important;
+}
+
+/* Estado activo cuando entra al viewport */
+[data-cms-animate].cms-animated {
+    opacity: 1 !important;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+    transition-property: opacity, transform !important;
+    transition-duration: 0.75s !important;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+    transition-delay: var(--cms-anim-delay, 0ms) !important;
+    pointer-events: auto !important;
+    will-change: opacity, transform;
+}
+
+/* Desactivar para usuarios con preferencia de movimiento reducido (A11y) o sin JS / rastreadores */
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+    [data-cms-animate] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+/* ==========================================================================
+   Efectos Hover Interactivos Progresivos para Enlaces de Iconos
+   ========================================================================== */
+.builder-icon-link {
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease !important;
+    will-change: transform;
+    display: inline-flex;
+    align-items: center;
+}
+
+.builder-icon-link.align-left {
+    transform-origin: left center !important;
+}
+
+.builder-icon-link.align-center {
+    transform-origin: center center !important;
+}
+
+.builder-icon-link.align-right {
+    transform-origin: right center !important;
+}
+
+/* Efecto 1: Zoom Progresivo Suave (5% gradual con aceleración y frenada suave) */
+.builder-icon-link.hover-zoom_smooth:hover {
+    transform: scale(1.05) !important;
+}
+
+.builder-icon-link.hover-zoom_smooth:active {
+    transform: scale(0.97) !important;
+}
+
+/* Efecto 2: Zoom Sutil (2.5% gradual) */
+.builder-icon-link.hover-zoom_subtle:hover {
+    transform: scale(1.025) !important;
+}
+
+.builder-icon-link.hover-zoom_subtle:active {
+    transform: scale(0.98) !important;
+}
+
+/* Efecto 3: Elevación Suave */
+.builder-icon-link.hover-lift:hover {
+    transform: translateY(-2px) !important;
+}
+
+.builder-icon-link.hover-lift:active {
+    transform: translateY(0) !important;
+}
+
+/* Efecto 4: Zoom Solo en el Icono */
+.builder-icon-box {
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    will-change: transform;
+}
+
+.builder-icon-link.hover-icon_only:hover .builder-icon-box {
+    transform: scale(1.12) !important;
+}
+
+.builder-icon-link.hover-icon_only:active .builder-icon-box {
+    transform: scale(0.96) !important;
+}
+
+/* ==========================================================================
+   Utilidades de Orden Flexbox Responsivo para Columnas del Page Builder
+   ========================================================================== */
+.order-none { order: 0 !important; }
+.order-first { order: -9999 !important; }
+.order-last { order: 9999 !important; }
+.order-1 { order: 1 !important; }
+.order-2 { order: 2 !important; }
+.order-3 { order: 3 !important; }
+.order-4 { order: 4 !important; }
+.order-5 { order: 5 !important; }
+.order-6 { order: 6 !important; }
+
+@media (min-width: 640px) {
+    .sm\:order-none { order: 0 !important; }
+    .sm\:order-first { order: -9999 !important; }
+    .sm\:order-last { order: 9999 !important; }
+    .sm\:order-1 { order: 1 !important; }
+    .sm\:order-2 { order: 2 !important; }
+    .sm\:order-3 { order: 3 !important; }
+    .sm\:order-4 { order: 4 !important; }
+    .sm\:order-5 { order: 5 !important; }
+    .sm\:order-6 { order: 6 !important; }
+}
+
+@media (min-width: 768px) {
+    .md\:order-none { order: 0 !important; }
+    .md\:order-first { order: -9999 !important; }
+    .md\:order-last { order: 9999 !important; }
+    .md\:order-1 { order: 1 !important; }
+    .md\:order-2 { order: 2 !important; }
+    .md\:order-3 { order: 3 !important; }
+    .md\:order-4 { order: 4 !important; }
+    .md\:order-5 { order: 5 !important; }
+    .md\:order-6 { order: 6 !important; }
+}
+
+@media (min-width: 1024px) {
+    .lg\:order-none { order: 0 !important; }
+    .lg\:order-first { order: -9999 !important; }
+    .lg\:order-last { order: 9999 !important; }
+    .lg\:order-1 { order: 1 !important; }
+    .lg\:order-2 { order: 2 !important; }
+    .lg\:order-3 { order: 3 !important; }
+    .lg\:order-4 { order: 4 !important; }
+    .lg\:order-5 { order: 5 !important; }
+    .lg\:order-6 { order: 6 !important; }
+}
+
+@media (min-width: 1280px) {
+    .xl\:order-none { order: 0 !important; }
+    .xl\:order-first { order: -9999 !important; }
+    .xl\:order-last { order: 9999 !important; }
+    .xl\:order-1 { order: 1 !important; }
+    .xl\:order-2 { order: 2 !important; }
+    .xl\:order-3 { order: 3 !important; }
+    .xl\:order-4 { order: 4 !important; }
+    .xl\:order-5 { order: 5 !important; }
+    .xl\:order-6 { order: 6 !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * PREVENCIÓN DE ZOOM AUTOMÁTICO EN MÓVILES (iOS Safari)
+ * En iPhone, fuentes menores a 16px en campos interactivos provocan zoom forzado.
+ * ════════════════════════════════════════════════════════════════════════════ */
+@media screen and (max-width: 768px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * BOTÓN DE PREFERENCIAS DE COOKIES (SHORTCODE {{cookies_button}})
+ * ════════════════════════════════════════════════════════════════════════════ */
+.cc-shortcode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.45em 1em;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--btn-secondary-text, #ffffff) !important;
+    background: var(--btn-secondary-bg, var(--primary-color, #10b981)) !important;
+    border: 1px solid transparent;
+    border-radius: var(--button-border-radius, 0.5rem);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-decoration: none !important;
+}
+
+.cc-shortcode-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cc-shortcode-btn:active {
+    transform: translateY(0);
+}
+
+.cc-shortcode-btn i {
+    font-size: 0.85em;
+    margin-right: 0.35em;
+}
+
