@@ -37,9 +37,8 @@ El módulo de medios administra las imágenes, documentos y archivos adjuntos de
 ## 3. Optimización de Vídeos y Detección de FFmpeg
 
 ### Detección Dinámica de FFmpeg (`MediaImageService::hasFFmpeg()`)
-- El sistema comprueba dinámicamente si el ejecutable `ffmpeg` está disponible en el servidor host mediante `exec('which ffmpeg')`.
-- **Estado en el Servidor Actual**: **FFmpeg está INSTALADO Y ACTIVO** (`/usr/bin/ffmpeg`). La comprobación `hasFFmpeg()` devuelve `true` en el entorno PHP del servidor web.
-- **Optimización Automática Activa**: Todas las subidas de vídeo MP4/MOV son procesadas automáticamente con `-movflags +faststart` para garantizar streaming instantáneo.
+- El sistema comprueba dinámicamente si el ejecutable `ffmpeg` está disponible en el servidor host mediante `which ffmpeg`.
+- **Optimización Automática**: Si `hasFFmpeg()` devuelve `true`, todas las subidas de vídeo MP4/MOV son procesadas automáticamente con `-movflags +faststart` para garantizar streaming instantáneo. Si FFmpeg no está presente en el entorno, el archivo original se conserva intacto sin interrumpir la subida.
 
 ### Optimización `+faststart` (cuando FFmpeg está activo)
 - Cuando el binario de FFmpeg está disponible en el servidor, `optimizarVideoFaststart()` ejecuta la instrucción de reordenación de átomos MP4:
@@ -57,7 +56,7 @@ El módulo de medios administra las imágenes, documentos y archivos adjuntos de
 - El servicio genera variantes optimizadas bajo demanda (`storage/app/public/cache/media/{hash}_{nombre}.{formato}`):
   - Modos de ajuste soportados: `'scale'` (proporcional), `'cover'` (recorte exacto centrado) y `'contain'`.
   - Formatos: WebP (por defecto), AVIF, PNG y JPG con muestreo de alta calidad (`imagecopyresampled`) y canal alfa transparente preservado.
-  - Entrega directa a 0ms en visitas posteriores (Cache HIT).
+  - Entrega directa a través de `GET /media/render` (`ImageController@render`) registrado con `withoutMiddleware('web')` (cero bloqueo de sesión y cero consultas SQL por imagen) y cabeceras `Cache-Control: public, max-age=31536000, immutable`.
 
 ### 4.2. Precalentamiento Inmediato tras la Subida (`prewarmVariants`)
 Al subir una imagen a través de `MediaController@upload`, se pre-generan de forma asíncrona las variantes exactas requeridas por la web pública:

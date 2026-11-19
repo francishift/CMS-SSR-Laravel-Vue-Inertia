@@ -43,20 +43,46 @@ const styleConfig = computed(() => {
 const containerRef = ref(null);
 const videoRef = ref(null);
 
-// Estado de visibilidad, reproducción, hover y búfer
+// Estado de visibilidad, reproducción, hover y búfer con retardo anti-parpadeo (debounce)
 const isVisible = ref(false);
 const isPlaying = ref(false);
 const isBuffering = ref(false);
+const hasReadyFrame = ref(false);
 const isHoverActive = ref(false);
 const isHoverLoading = ref(false);
 let observer = null;
 let playPromise = null;
+let bufferingTimer = null;
+let startupPlayTimer = null;
+
+function clearBufferingTimer() {
+    if (bufferingTimer) {
+        clearTimeout(bufferingTimer);
+        bufferingTimer = null;
+    }
+}
+
+function scheduleBufferingOverlay(delayMs = 450) {
+    clearBufferingTimer();
+    bufferingTimer = setTimeout(() => {
+        const el = videoRef.value;
+        if (el && el.readyState < 3 && !el.ended) {
+            isBuffering.value = true;
+        }
+    }, delayMs);
+}
 
 function onMediaWaiting() {
-    isBuffering.value = true;
+    // Una vez pintado el primer fotograma, no volver a cubrir el vídeo con cortinas superpuestas
+    if (hasReadyFrame.value && !playOnHover.value) {
+        return;
+    }
+    scheduleBufferingOverlay(300);
 }
 
 function onMediaReady() {
+    hasReadyFrame.value = true;
+    clearBufferingTimer();
     isBuffering.value = false;
 }
 
@@ -86,9 +112,10 @@ const videoSrc = computed(() => {
         }
     }
 
-    // Si no se definió imagen poster y está activada la opción de primer fotograma, añadir #t=0.001
+    // Si no hay poster ni autoplay y está activada la opción de primer fotograma, añadir #t=0.001
     const useFirstFrame = contentConfig.value.use_first_frame !== false;
-    if (useFirstFrame && !contentConfig.value.poster && !src.includes('#t=')) {
+    const auto = Boolean(contentConfig.value.autoplay);
+    if (useFirstFrame && !auto && !contentConfig.value.poster && !src.includes('#t=')) {
         return `${src}#t=0.001`;
     }
     return src;
@@ -247,6 +274,10 @@ const formattedDuration = computed(() => formatSeconds(duration.value));
 function onTimeUpdate() {
     if (videoRef.value) {
         currentTime.value = videoRef.value.currentTime || 0;
+        if (isBuffering.value && !videoRef.value.paused && videoRef.value.readyState >= 2) {
+            clearBufferingTimer();
+            isBuffering.value = false;
+        }
     }
 }
 
@@ -387,7 +418,59 @@ function onMouseLeave() {
     }
 }
 
-// Configuración de IntersectionObserver para Autoplay y Auto-pause en scroll
+// Espera a que las imágenes prioritarias (eager) de la vista actual terminen de descargar (tope 550 ms)
+// antes de iniciar el streaming masivo del archivo MP4 para no saturar el ancho de banda inicial.
+function triggerCooperativeAutoplay() {
+    if (startupPlayTimer) {
+        clearTimeout(startupPlayTimer);
+        startupPlayTimer = null;
+    }
+
+    const startPlayback = () => {
+        startupPlayTimer = null;
+        if (isVisible.value && isAutoplay.value) {
+            safePlay();
+        }
+    };
+
+    if (typeof document === 'undefined') return;
+
+    const pendingEagerImages = Array.from(document.querySelectorAll('img')).filter(
+        (img) => !img.complete && (img.loading === 'eager' || img.getAttribute('fetchpriority') === 'high')
+    );
+
+    if (pendingEagerImages.length === 0) {
+        startupPlayTimer = setTimeout(startPlayback, 60);
+        return;
+    }
+
+    let settled = false;
+    const finishOnce = () => {
+        if (settled) return;
+        settled = true;
+        if (startupPlayTimer) {
+            clearTimeout(startupPlayTimer);
+        }
+        startPlayback();
+    };
+
+    let remaining = pendingEagerImages.length;
+    const onImgDone = () => {
+        remaining -= 1;
+        if (remaining <= 0) {
+            finishOnce();
+        }
+    };
+
+    pendingEagerImages.forEach((img) => {
+        img.addEventListener('load', onImgDone, { once: true });
+        img.addEventListener('error', onImgDone, { once: true });
+    });
+
+    // Tope máximo de cortesía (550 ms) por si alguna imagen tardara más en responder
+    startupPlayTimer = setTimeout(finishOnce, 550);
+}
+
 onMounted(() => {
     if (typeof window === 'undefined') return;
 
@@ -399,11 +482,13 @@ onMounted(() => {
                     if (entry.isIntersecting && entry.intersectionRatio > 0) {
                         isVisible.value = true;
                         if (isAutoplay.value) {
-                            safePlay();
+                            triggerCooperativeAutoplay();
                         }
                     } else {
                         isVisible.value = false;
                         if (pauseOnScroll.value) {
+                            clearBufferingTimer();
+                            isBuffering.value = false;
                             safePause();
                         }
                     }
@@ -416,25 +501,40 @@ onMounted(() => {
     } else {
         isVisible.value = true;
         if (isAutoplay.value) {
-            safePlay();
+            triggerCooperativeAutoplay();
         }
     }
 });
 
 onBeforeUnmount(() => {
-    if (observer && containerRef.value) {
-        observer.unobserve(containerRef.value);
+    clearBufferingTimer();
+    if (startupPlayTimer) {
+        clearTimeout(startupPlayTimer);
+        startupPlayTimer = null;
+    }
+    if (observer) {
+        if (containerRef.value) {
+            observer.unobserve(containerRef.value);
+        }
         observer.disconnect();
+        observer = null;
     }
     safePause();
+    if (videoRef.value) {
+        videoRef.value.removeAttribute('src');
+        videoRef.value.load();
+    }
 });
 
-// Reactividad si cambia la URL del vídeo en vivo desde el inspector
+// Reactividad limpia si cambia la URL del vídeo en vivo o al navegar por SPA entre proyectos
 watch(videoSrc, (newSrc) => {
+    clearBufferingTimer();
+    isBuffering.value = false;
+    hasReadyFrame.value = false;
     if (newSrc && videoRef.value) {
         videoRef.value.load();
         if (isAutoplay.value && isVisible.value) {
-            safePlay();
+            triggerCooperativeAutoplay();
         }
     }
 });
@@ -515,12 +615,11 @@ watch(videoSrc, (newSrc) => {
                 @pause="isPlaying = false"
                 @loadstart="onMediaWaiting"
                 @waiting="onMediaWaiting"
-                @seeking="onMediaWaiting"
                 @canplay="onMediaReady"
                 @canplaythrough="onMediaReady"
                 @playing="onMediaReady"
                 @loadeddata="onMediaReady"
-                @seeked="onMediaReady"
+                @loadedmetadata="!isAutoplay ? onMediaReady() : undefined"
             ></video>
 
             <!-- Badge Indicador de Estado al Pasar el Ratón (Hover) -->
@@ -557,11 +656,11 @@ watch(videoSrc, (newSrc) => {
                 </div>
             </Transition>
 
-            <!-- Preloader Optimizado para Vídeos Grandes (Glassmorphism + Pulsating Dual Aura) -->
+            <!-- Preloader Inicial para Vídeos (solo antes del primer fotograma, nunca parpadea encima de reproducción activa) -->
             <Transition name="fade-preloader">
                 <div
-                    v-if="isBuffering && videoSrc && !playOnHover"
-                    class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/70 backdrop-blur-md transition-all duration-500"
+                    v-if="isBuffering && !hasReadyFrame && videoSrc && !playOnHover"
+                    class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/70 backdrop-blur-md transition-all duration-300"
                 >
                     <!-- Resplandor / Aura Pulsante en el Fondo -->
                     <div class="relative flex items-center justify-center">
@@ -720,14 +819,16 @@ watch(videoSrc, (newSrc) => {
     animation: shimmer-slide 1.5s ease-in-out infinite;
 }
 
-.fade-preloader-enter-active,
+.fade-preloader-enter-active {
+    transition: opacity 0.25s ease;
+}
+
 .fade-preloader-leave-active {
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition: opacity 0.18s ease-out;
 }
 
 .fade-preloader-enter-from,
 .fade-preloader-leave-to {
     opacity: 0;
-    transform: scale(1.02);
 }
 </style>

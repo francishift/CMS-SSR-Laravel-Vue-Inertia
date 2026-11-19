@@ -2,7 +2,7 @@
 
 ## 1. Descripción General
 
-El **Módulo de Gestión de Usuarios** es el núcleo de administración del sistema **CMS Base de Usuarios**. Proporciona una interfaz completa, segura y optimizada para administrar los usuarios registrados en el sistema, permitiendo su creación, edición, activación/desactivación y eliminación.
+El **Módulo de Gestión de Usuarios** es el núcleo de administración de cuentas y roles del sistema **CMS SSR**. Proporciona una interfaz completa, segura y optimizada para administrar los usuarios registrados en el sistema, permitiendo su creación, edición, activación/desactivación y eliminación.
 
 El acceso a este módulo está estrictamente restringido a usuarios con el rol `admin` mediante el middleware de autorización de Spatie `role:admin`.
 
@@ -28,20 +28,20 @@ Para incorporar un nuevo rol en el futuro:
 
 ## 3. Matriz de Rutas API y Controladores
 
-Todas las rutas están agrupadas bajo el prefijo `/usuarios`, protegidas por el grupo de middleware `['auth', 'role:admin']`:
+Todas las rutas están agrupadas bajo el prefijo `/panel/usuarios`, protegidas por el grupo de middleware `['auth', 'role:admin']`:
 
 | Método HTTP | Ruta URI | Nombre de Ruta | Acción en `UserController` | Descripción |
 |---|---|---|---|---|
-| `GET` | `/usuarios` | `usuarios.index` | `index(Request $request)` | Listado paginado de usuarios activos con búsqueda y ordenación server-side |
-| `GET` | `/usuarios/papelera` | `usuarios.trashed` | `trashed(Request $request)` | Listado paginado de usuarios eliminados suavemente (Papelera) |
-| `GET` | `/usuarios/crear` | `usuarios.create` | `create()` | Formulario de creación de nuevo usuario |
-| `POST` | `/usuarios` | `usuarios.store` | `store(StoreUserRequest $request)` | Procesa la creación y envía correo de bienvenida |
-| `GET` | `/usuarios/{user}/editar` | `usuarios.edit` | `edit(User $user)` | Formulario de edición con datos resueltos por `UserResource` |
-| `PUT` | `/usuarios/{user}` | `usuarios.update` | `update(UpdateUserRequest $request, User $user)` | Guarda los cambios del usuario, contraseña opcional y rol |
-| `PATCH` | `/usuarios/{user}/activar` | `usuarios.toggle-active` | `toggleActive(User $user)` | Alterna el estado `active` (true/false) |
-| `PATCH` | `/usuarios/{id}/restaurar` | `usuarios.restore` | `restore(int $id)` | Restaura un usuario desde la papelera |
-| `DELETE` | `/usuarios/{user}` | `usuarios.destroy` | `destroy(User $user)` | Elimina suavemente al usuario (Soft Delete) |
-| `DELETE` | `/usuarios/{id}/definitivo` | `usuarios.force-delete` | `forceDelete(int $id)` | Elimina de forma permanente al usuario de la base de datos |
+| `GET` | `/panel/usuarios` | `usuarios.index` | `index(Request $request)` | Listado paginado de usuarios activos con búsqueda y ordenación server-side |
+| `GET` | `/panel/usuarios/papelera` | `usuarios.trashed` | `trashed(Request $request)` | Listado paginado de usuarios eliminados suavemente (Papelera) |
+| `GET` | `/panel/usuarios/crear` | `usuarios.create` | `create()` | Formulario de creación de nuevo usuario |
+| `POST` | `/panel/usuarios` | `usuarios.store` | `store(StoreUserRequest $request)` | Procesa la creación y envía correo de bienvenida |
+| `GET` | `/panel/usuarios/{user}/editar` | `usuarios.edit` | `edit(User $user)` | Formulario de edición con datos resueltos por `UserResource` |
+| `PUT` | `/panel/usuarios/{user}` | `usuarios.update` | `update(UpdateUserRequest $request, User $user)` | Guarda los cambios del usuario, contraseña opcional y rol |
+| `PATCH` | `/panel/usuarios/{user}/activar` | `usuarios.toggle-active` | `toggleActive(User $user)` | Alterna el estado `active` (true/false) |
+| `PATCH` | `/panel/usuarios/{id}/restaurar` | `usuarios.restore` | `restore(int $id)` | Restaura un usuario desde la papelera |
+| `DELETE` | `/panel/usuarios/{user}` | `usuarios.destroy` | `destroy(User $user)` | Elimina suavemente al usuario (Soft Delete) |
+| `DELETE` | `/panel/usuarios/{id}/definitivo` | `usuarios.force-delete` | `forceDelete(int $id)` | Elimina de forma permanente al usuario de la base de datos |
 
 ---
 

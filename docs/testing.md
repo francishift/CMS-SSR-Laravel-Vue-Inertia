@@ -20,16 +20,16 @@ php artisan test
 vendor/bin/phpunit
 ```
 
-> **Nota de entorno (`phpunit.xml`)**: El archivo `phpunit.xml` define explícitamente `<ini name="memory_limit" value="512M"/>` para garantizar que la ejecución completa de las 223 pruebas en un único proceso no se interrumpa en servidores donde el `php.ini` de CLI tenga el límite por defecto de `128M` (p. ej. Plesk).
+> **Nota de entorno (`phpunit.xml`)**: El archivo `phpunit.xml` define explícitamente `<ini name="memory_limit" value="512M"/>` para garantizar que la ejecución completa de toda la suite de pruebas en un único proceso no se interrumpa en servidores donde el `php.ini` de CLI tenga el límite por defecto de `128M` (p. ej. Plesk).
 
 ---
 
 ## 3. Cobertura y Métricas de Calidad
 
-- **Pruebas Totales**: 247
-- **Pruebas Pasadas**: 247 (100% Éxito)
-- **Aserciones Ejecutadas**: 1.225
-- **Tiempo de Ejecución medio**: ~12 segundos
+- **Pruebas Totales**: 248
+- **Pruebas Pasadas**: 248 (100% Éxito)
+- **Aserciones Ejecutadas**: 1.231
+- **Tiempo de Ejecución medio**: ~12–25 segundos
 
 ---
 
@@ -129,7 +129,7 @@ vendor/bin/phpunit
 ### 4.18 Fondos Independientes Claro/Oscuro en Secciones y Renderizado CSS SSR (`Tests\Unit\Services\PageBuilderSectionDarkThemeCleanTest` & `Tests\Feature\SectionDualThemeBackgroundSsrTest`)
 - **Higiene de Payload Público (`limpiarLayoutParaPublico`)**: Verifica que cuando `bg_dark_mode` es `'inherit'`, se podan todas las claves exclusivas `*_dark` del JSON público, y que cuando es `'custom'` se preservan íntegramente.
 - **Persistencia y Cabecera Transparente Dual**: Valida el guardado de ajustes independientes Claro/Oscuro (`bg_image_dark`, `bg_overlay_dark`, `transparent_header_nav_color_dark`) y su exposición en `cabeceraTransparente` de Inertia, además de la sustitución de tokens dinámicos (`{category.featured_image}`) en `bg_image_dark`.
-- **Renderizado SSR Sin Parpadeo y Sanitización `<style>`**: Comprueba que el HTML SSR emita las capas aisladas `builder-media-only-dark`, variables `--sec-overlay-light/dark`, preloads LCP con `media="(prefers-color-scheme: dark)..."` y etiquetas `<style>` sin escapar selectores hijos `>` ni permitir cierres `</style>`.
+- **Renderizado SSR Sin Parpadeo, Preload Inteligente y Entrega Stateless de Medios**: Comprueba que el HTML SSR emita las capas aisladas `builder-media-only-dark`, variables `--sec-overlay-light/dark`, omisión de preloads especulativos en modo `user_choice` cuando `bg_dark_mode === 'custom'`, etiquetas `<style>` sin escapar selectores hijos `>` ni permitir cierres `</style>`, y que la ruta `GET /media/render` opere sin middlewares de sesión ni Inertia (`StartSession`, `HandleInertiaRequests`, `VerificarUsuarioActivo`).
 
 
 

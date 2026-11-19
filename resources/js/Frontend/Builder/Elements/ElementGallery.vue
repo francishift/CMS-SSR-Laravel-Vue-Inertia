@@ -998,12 +998,12 @@ function normalizeVideoSrc(src) {
                         <ResponsiveImage
                             :src="item.src"
                             :alt="item.alt || item.title || 'Imagen de galería'"
-                            :width="undefined"
-                            :height="undefined"
+                            :width="600"
+                            :height="imageAspectClass ? 338 : undefined"
                             :fit="props.content?.image_fit || (carouselCardStyle === 'badge' ? 'contain' : 'cover')"
                             :quality="85"
-                            :widths="[360, 640, 960, 1280]"
-                            :sizes="'(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'"
+                            :widths="[320, 480, 640, 960]"
+                            :sizes="responsiveSizes"
                             loading="eager"
                             :shimmer="carouselCardStyle === 'badge' || props.content?.image_fit === 'cover'"
                             :imgClass="[
@@ -1106,12 +1106,12 @@ function normalizeVideoSrc(src) {
                         <ResponsiveImage
                             :src="item.src"
                             :alt="item.alt || item.title || 'Imagen de galería'"
-                            :width="undefined"
-                            :height="undefined"
+                            :width="600"
+                            :height="imageAspectClass ? 338 : undefined"
                             :fit="props.content?.image_fit || (carouselCardStyle === 'badge' ? 'contain' : 'cover')"
                             :quality="85"
-                            :widths="[360, 640, 960, 1280]"
-                            :sizes="'(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'"
+                            :widths="[320, 480, 640, 960]"
+                            :sizes="responsiveSizes"
                             loading="eager"
                             :shimmer="carouselCardStyle === 'badge' || props.content?.image_fit === 'cover'"
                             :imgClass="[

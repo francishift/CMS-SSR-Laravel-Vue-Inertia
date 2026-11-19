@@ -13,7 +13,7 @@ El desarrollo está organizado en 6 fases estratégicas:
 | **Fase 1: Cimientos y Backend Seguro** | Migraciones, modelos Eloquent, generador dinámico de reglas Laravel, servicio de procesamiento sanitizado, API Resources, FormRequest admin y endpoint público. | ✅ **COMPLETA** |
 | **Fase 2: Constructor Visual y Panel Admin** | Constructor drag-and-drop modular (`Edit.vue` y 8 parciales) con 23 tipos de campo, inspector lateral, vista previa interactiva con modo simulación y real, editor WYSIWYG de emails, bandeja de envíos (`Submissions.vue`) y exportación CSV. | ✅ **COMPLETA** |
 | **Fase 3: Renderizado Público y Page Builder** | Componente `ElementForm.vue` para el frontend público con SSR, inspector `ElementFormInspector.vue` en el maquetador visual, endpoint `schema` filtrado, envío AJAX con feedback animado y grid de 12 columnas responsivo. | ✅ **COMPLETA** |
-| **Fase 4: Blindaje de Seguridad Avanzado** | Integración del widget de Cloudflare Turnstile opcional, rate-limiting distribuido y auditoría de penetración. | ⏳ **PENDIENTE** |
+| **Fase 4: Blindaje de Seguridad Avanzado** | Integración del widget de Cloudflare Turnstile opcional (`TurnstileService` + orígenes CSP condicionales), honeypot y rate-limiting por IP. | ✅ **COMPLETA** |
 | **Fase 5: Notificaciones y Emails Dinámicos** | Despacho síncrono inmediato vía SMTP de `FormNotificationMail` (notificación al admin y autorespuesta al usuario), reemplazo de variables dinámicas, tabla `{all_fields}` con inline CSS, personalización visual (color de cabecera y logotipo por formulario) y detección automática de emails/teléfonos como enlaces clicables. | ✅ **COMPLETA** |
 | **Fase 6: Motor de Scripts en Navegador** | Ejecución en frontend de `scripts_before`, `scripts_on_submit` y `scripts_after` para píxeles de conversión y analítica. | ✅ **COMPLETA** |
 
@@ -266,7 +266,7 @@ DELETE     /panel/formularios/{form}/envios/{sub} .. panel.formularios.submissio
 GET|HEAD   /panel/formularios/{form}/exportar-csv .. panel.formularios.export-csv
 
 // Endpoints Públicos (sin autenticación)
-POST       /formularios/{slug}/enviar .............. public.form.submit     (throttle:5,1)
+POST       /formularios/{slug}/enviar .............. public.form.submit     (throttle:30,1 + límite por IP)
 GET|HEAD   /api/formularios/{slug} ................. public.form.schema     (throttle:30,1)
 GET|HEAD   /api/paginas/{slug} ..................... public.page.content    (throttle:60,1)
 ```
@@ -275,7 +275,7 @@ GET|HEAD   /api/paginas/{slug} ..................... public.page.content    (thr
 
 ## 7. Suite de Pruebas Automatizadas
 
-El módulo cuenta con una batería de **51 pruebas automatizadas específicas** (que forman parte de los **155 tests** globales del CMS que pasan al 100%):
+El módulo cuenta con una batería de **51 pruebas automatizadas específicas** (integradas dentro de las **248 pruebas** globales del CMS que pasan al 100%):
 
 * `tests/Feature/Services/FormValidationRuleBuilderTest.php` (12 tests): Generación de reglas, validación individual de arrays, protección anti-payload bombing y whitelist de seguridad.
 * `tests/Feature/Services/FormSubmissionServiceTest.php` (15 tests): Sanitización anti-XSS, honeypot, rate limiting por IP, almacenamiento y validaciones.
@@ -285,9 +285,7 @@ El módulo cuenta con una batería de **51 pruebas automatizadas específicas** 
 
 ---
 
-## 8. Próximos Pasos
+## 8. Protección Anti-Spam con Cloudflare Turnstile y CSP Condicional
 
-| Fase | Descripción | Prioridad |
-|---|---|---|
-| **Fase 4** | Integración de Cloudflare Turnstile para formularios con `requires_captcha = true` | Media |
-| **Fase 6** | Ejecución de `scripts_before`, `scripts_on_submit` y `scripts_after` en el frontend (tracking, analytics, píxeles de conversión) | Baja |
+- Cuando `TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` están configuradas en `.env` y el formulario activa `requires_captcha`, `ElementForm.vue` inyecta bajo demanda `preconnect` y el widget de Cloudflare Turnstile, validando el token en servidor mediante `TurnstileService`.
+- El middleware `SecurityHeaders` autoriza `https://challenges.cloudflare.com` en la cabecera `Content-Security-Policy` únicamente cuando existen formularios activos con captcha habilitado (`Form::hasAnyCaptchaEnabled()`).

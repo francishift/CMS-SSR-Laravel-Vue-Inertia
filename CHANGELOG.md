@@ -17,12 +17,17 @@ Todos los cambios notables de **CMS SSR (Laravel + Vue + Inertia)** se documenta
 - **Selector de Tamaño Visual del Título en Páginas Básicas (`title_size`)**:
   - Permite elegir en `Paginas/Create` y `Paginas/Edit` la escala tipográfica visual (`OPCIONES_TAMANO_VISUAL`) para páginas estáticas sin Page Builder (ej. *Política de privacidad* y *Política de cookies*), conservando el `<h1>` semántico para SEO.
 
-### Correcciones y Seguridad CSP
+### Correcciones, Rendimiento Multimedia y Seguridad CSP
+- **Estabilidad de Vídeo HTML5, Galerías Ligeras y Entrega Stateless de Imágenes (`ElementVideo`, `ElementGallery`, `/media/render`)**:
+  - **`ElementVideo.vue`**: acotado el overlay *"Cargando vídeo..."* exclusivamente a la carga previa al primer fotograma (`!hasReadyFrame`), suprimiendo falsos disparos por `stalled`/`seeking` en redes lentas o bucles; añadido `autoplay` cooperativo tras completar las imágenes prioritarias (`loading="eager"`, máx. `550 ms`) y clave `:key` por artículo en `Public/Article.vue` para abortar descargas `206 Range` en vuelo durante navegaciones SPA.
+  - **`ElementGallery.vue` y `ResponsiveImage.vue`**: optimizado el `srcset` en carruseles infinitos (`[320, 480, 640, 960]` con `:sizes="responsiveSizes"`, ~60 % menos peso por miniatura) y añadida verificación reactiva de caché al mutar `props.src`.
+  - **Ruta `GET /media/render` sin bloqueo de sesión (`withoutMiddleware('web')`) y limpieza de diferidos en `PublicPageController`**: las variantes WebP se sirven de forma *stateless* sin bloqueo `StartSession` ni consultas de usuario, y las vistas de artículo maquetadas con plantillas del Builder omiten llamadas `Inertia::defer` redundantes (`relacionados`, `navegacion`).
+  - **Preload LCP Inteligente en `BuilderSection.vue`**: cuando `bg_dark_mode` es `'custom'` y el sitio opera en `'user_choice'`, se omite el `<link rel="preload">` especulativo en `<head>` para evitar advertencias de consola y descargas innecesarias si `localStorage` difiere de `prefers-color-scheme`.
 - **Renderizado SSR Íntegro y Seguro de `custom_css` en todo el Page Builder (`sanitizeInlineCss`)**:
   - Sustituido `v-text` por `v-html` sanitizado con `sanitizeInlineCss()` (`useSanitize.js`) en los 14 componentes estructurales y modulares del Builder, evitando que `@vue/server-renderer` escape selectores CSS hijos (`>` -> `&gt;`) o comillas en el HTML SSR inicial y neutralizando cierres `</style>` contra inyección XSS.
 - **Sincronización Anti-FOUC de `frontend_default_theme` en `<head>` (`CspInlineScripts`)**:
   - Añadidas las variantes `PUBLIC_THEME_USER_CHOICE_LIGHT`, `PUBLIC_THEME_USER_CHOICE_DARK` y `PUBLIC_THEME_USER_CHOICE_SYSTEM` junto con `CspInlineScripts::publicThemeScript()` y sus hashes `SHA-256` en `publicHashes()`, eliminando cualquier destello de tema en primeras visitas tanto en páginas públicas como en `404.blade.php`.
-- **Suite de Pruebas**: ampliada a **247 pruebas automatizadas (1.225 aserciones)**.
+- **Suite de Pruebas**: ampliada a **248 pruebas automatizadas (1.231 aserciones)**.
 
 ---
 

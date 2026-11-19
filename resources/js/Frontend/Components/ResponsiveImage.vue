@@ -10,7 +10,7 @@
  *  - Genera automáticamente `srcset` y `sizes` para cargas ligeras en móviles.
  *  - Detección de errores (@error): Muestra aviso discreto si la imagen no se pudo procesar.
  */
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { imageUrl, imageSrcset } from '@/Composables/useImage';
 
 const props = defineProps({
@@ -40,34 +40,15 @@ const esSvg = computed(() => {
     return rutaLimpia.endsWith('.svg');
 });
 
-watch(
-    () => props.src,
-    () => {
-        errorCarga.value = false;
-    }
-);
-
-function onLoad() {
-    cargada.value = true;
-    errorCarga.value = false;
-}
-
-function onError() {
-    errorCarga.value = true;
-    cargada.value = true;
-}
-
-onMounted(() => {
+function verificarImagenEnCache() {
     const el = imgRef.value;
-    if (!el || !el.complete) return;
+    if (!el || !el.complete) return false;
 
-    // Si la imagen ya está en la caché del navegador o completó antes de hidratar SSR, mostrar al instante
     if (el.naturalWidth > 0) {
         cargada.value = true;
-        return;
+        return true;
     }
 
-    // Algunos motores reportan naturalWidth === 0 en SVGs válidos sin atributos width/height explícitos
     if (esSvg.value) {
         if (typeof el.decode === 'function') {
             el.decode()
@@ -82,7 +63,35 @@ onMounted(() => {
         } else {
             cargada.value = true;
         }
+        return true;
     }
+
+    return false;
+}
+
+watch(
+    () => props.src,
+    () => {
+        errorCarga.value = false;
+        cargada.value = false;
+        nextTick(() => {
+            verificarImagenEnCache();
+        });
+    }
+);
+
+function onLoad() {
+    cargada.value = true;
+    errorCarga.value = false;
+}
+
+function onError() {
+    errorCarga.value = true;
+    cargada.value = true;
+}
+
+onMounted(() => {
+    verificarImagenEnCache();
 });
 
 const defaultUrl = computed(() => {

@@ -60,7 +60,7 @@ Está diseñado para gestionar sitios web dinámicos, periódicos digitales o bl
 
 ### 🛡️ 4. Seguridad y Resiliencia
 - **Cabeceras HTTP de Seguridad y CSP Estricta (Nota A+ en MDN Observatory)**: Middleware global `SecurityHeaders` compatible con caché Redis RAM, Page Builder, Turnstile, Google Maps, Leaflet y GA4, utilizando hashes criptográficos SHA-256 y `nonces` dinámicos sin `'unsafe-inline'` en `script-src`.
-- **Roles y Permisos**: Control de acceso basado en roles con `Spatie/Laravel-Permission` (`admin`, `gestor`, `encargado`, `empleado`).
+- **Roles y Permisos**: Control de acceso basado en roles con `Spatie/Laravel-Permission` (`admin`, `gestor`, `cliente`).
 - **Centro de Actividad, Telemetría IP y Auditoría (`spatie/laravel-activitylog` v5.1)**: Panel exclusivo para administradores (`/panel/actividad`) con registro de IPs de descargas, históricos perpetuos inmunes a limpiezas, auditoría Antes/Después de modelos y registro de accesos/fallos de login.
 - **Protección contra Inyecciones**: Validaciones rigurosas con `FormRequests` de Laravel.
 - **Watchdog de Proceso SSR**: Un guardian en `routes/console.php` monitoriza el puerto `13714` mediante el cron de Laravel, auto-reiniciando el motor Node.js si el servidor se reinicia o sufre una caída.
@@ -188,7 +188,7 @@ PASS  Tests\Feature\SecurityHeadersTest
 PASS  Tests\Feature\PublicResponseCacheTest
 PASS  Tests\Feature\SeoCanonicalAndDuplicateUrlsTest
 ...
-Tests:    247 passed (1225 assertions)
+Tests:    248 passed (1231 assertions)
 Duration: ~12s
 ```
 

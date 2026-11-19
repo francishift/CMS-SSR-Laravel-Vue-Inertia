@@ -28,7 +28,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicPageController::class, 'home'])->name('public.home');
 Route::get('/buscar', [PublicPageController::class, 'search'])->name('public.search');
-Route::get('/media/render', [\App\Http\Controllers\ImageController::class, 'render'])->name('media.render');
+
+// Entrega estática ultrarrápida de variantes WebP sin bloqueo de sesión PHP ni sobrecarga de middlewares Inertia/Auth
+Route::get('/media/render', [\App\Http\Controllers\ImageController::class, 'render'])
+    ->withoutMiddleware('web')
+    ->name('media.render');
 
 // Canales de Contacto Directo Seguro (Protección Anti-Bot y Anti-Scraping)
 // Rate-limit: máximo 10 peticiones por minuto por IP para dificultar el scraping masivo.

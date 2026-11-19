@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Page;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\CacheInvalidationService;
 use App\Services\PageBuilderResolverService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -166,12 +167,23 @@ class SectionDualThemeBackgroundSsrTest extends TestCase
             $this->assertStringContainsString('builder-overlay-layer builder-media-only-dark', $html);
             $this->assertStringContainsString('--sec-overlay-light:transparent;--sec-overlay-dark:rgba(0,0,0,0.6)', $html);
 
-            // 2. Los preloads en <head> están condicionados a (prefers-color-scheme: dark) para no penalizar modo claro ni Googlebot
-            $this->assertStringContainsString('media="(prefers-color-scheme: dark) and (min-width: 1024px)"', $html);
+            // 2. En modo 'user_choice' no se emiten preloads especulativos que contradigan localStorage (cero avisos de consola en Chrome)
+            $this->assertStringNotContainsString('rel="preload" as="image"', $html);
 
             // 3. Dentro de la etiqueta <style> renderizada por SSR el selector '>' NO se escapa como '&gt;', y se neutraliza '</style>'
             $this->assertStringContainsString('<style>#cabecera > .test-child { opacity: 1; }<script>alert(1)</script></style>', $html);
             $this->assertStringNotContainsString('<style>#cabecera &gt;', $html);
+        }
+
+        // 4. Si el sitio fuerza modo 'dark' globalmente, sí emite el preload LCP de la imagen oscura
+        SiteSetting::query()->update(['frontend_theme_mode' => 'dark']);
+        CacheInvalidationService::limpiarCachePublica();
+
+        $darkResponse = $this->get('/');
+        $darkHtml = (string) $darkResponse->getContent();
+        if (str_contains($darkHtml, ' inertia>')) {
+            $this->assertStringContainsString('rel="preload" as="image"', $darkHtml);
+            $this->assertStringContainsString('silla-pc.png', $darkHtml);
         }
     }
 
@@ -213,5 +225,22 @@ class SectionDualThemeBackgroundSsrTest extends TestCase
             '/storage/media/banner-oscuro-cat.webp',
             $resolved['sections'][0]['settings']['bg_image_dark']
         );
+    }
+
+    #[Test]
+    public function ruta_media_render_opera_sin_bloqueo_de_sesion_web(): void
+    {
+        $router = app('router');
+        $route = $router->getRoutes()->getByName('media.render');
+        $this->assertNotNull($route);
+
+        $effectiveMiddlewares = $router->resolveMiddleware(
+            $route->gatherMiddleware(),
+            $route->excludedMiddleware()
+        );
+
+        $this->assertNotContains(\Illuminate\Session\Middleware\StartSession::class, $effectiveMiddlewares);
+        $this->assertNotContains(\App\Http\Middleware\HandleInertiaRequests::class, $effectiveMiddlewares);
+        $this->assertNotContains(\App\Http\Middleware\VerificarUsuarioActivo::class, $effectiveMiddlewares);
     }
 }

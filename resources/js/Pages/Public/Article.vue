@@ -204,8 +204,12 @@ const canonicalUrl = computed(() => {
         <meta name="robots" :content="articuloItem?.meta_robots || 'index, follow, max-image-preview:large'" />
     </Head>
 
-    <!-- Vista Maquetada con Page Builder (Si tiene plantilla activa asignada) -->
-    <PageBuilderRenderer v-if="articuloItem.layout_json?.sections?.length" :layout="articuloItem.layout_json" />
+    <!-- Vista Maquetada con Page Builder (Si tiene plantilla activa asignada, con key por artículo para cancelar descargas multimedia previas en SPA) -->
+    <PageBuilderRenderer
+        v-if="articuloItem.layout_json?.sections?.length"
+        :key="`art-builder-${articuloItem.id || articuloItem.slug}`"
+        :layout="articuloItem.layout_json"
+    />
 
     <!-- Vista Estándar Clásica del Sistema (Si no tiene plantilla asignada) -->
     <template v-else>

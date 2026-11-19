@@ -745,6 +745,7 @@ function buildSidePreloads(hasVid, poster, urls, hideMob, schemeMedia = '') {
 const preloadEntries = computed(() => {
     if (!isFirstSection.value) return [];
 
+    // Si ambos temas comparten la misma imagen/vídeo, siempre se utiliza independientemente de localStorage
     if (!isCustomDarkBg.value) {
         return buildSidePreloads(
             hasBgVideo.value,
@@ -755,9 +756,11 @@ const preloadEntries = computed(() => {
     }
 
     const mode = siteSettings.value.frontend_theme_mode || 'light';
-    const defTheme = siteSettings.value.frontend_default_theme || 'light';
 
-    if (mode === 'light' || (mode === 'user_choice' && defTheme === 'light')) {
+    // Cuando el tema del sitio es fijo ('light' o 'dark'), precargar con seguridad la variante garantizada.
+    // En modo 'user_choice' el visitante puede sobreescribir el tema del S.O. vía localStorage, por lo que
+    // no se emiten preloads especulativos para evitar descargas ociosas y avisos de consola en Chrome.
+    if (mode === 'light') {
         return buildSidePreloads(
             hasBgVideo.value,
             effectivePosterUrl.value,
@@ -766,7 +769,7 @@ const preloadEntries = computed(() => {
         );
     }
 
-    if (mode === 'dark' || (mode === 'user_choice' && defTheme === 'dark')) {
+    if (mode === 'dark') {
         return buildSidePreloads(
             hasDarkBgVideo.value,
             effectiveDarkPosterUrl.value,
@@ -775,23 +778,7 @@ const preloadEntries = computed(() => {
         );
     }
 
-    // mode === 'user_choice' && defTheme === 'system': filtrar con prefers-color-scheme nativo
-    return [
-        ...buildSidePreloads(
-            hasBgVideo.value,
-            effectivePosterUrl.value,
-            bgUrls.value,
-            settings.value.bg_hide_mobile,
-            '(prefers-color-scheme: light)'
-        ),
-        ...buildSidePreloads(
-            hasDarkBgVideo.value,
-            effectiveDarkPosterUrl.value,
-            darkBgUrls.value,
-            settings.value.bg_hide_mobile_dark,
-            '(prefers-color-scheme: dark)'
-        ),
-    ];
+    return [];
 });
 
 // ─── Ciclo de vida y reproducción eficiente de vídeos de fondo por tema y viewport ───

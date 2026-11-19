@@ -19,7 +19,8 @@ En `MenuItem::resolvedUrl`, la URL se resuelve dinámicamente según el tipo de 
 2. **Categoría (`category_id`)**: Retorna `/{category_slug}`.
 3. **Artículo (`article_id`)**: Retorna `/{category_slug}/{article_slug}`.
 4. **Página Estática (`page_id`)**: Retorna `/{page_slug}`.
-5. **URL Personalizada (`url`)**: Retorna la URL personalizada configurada.
+5. **Catálogo de Descargas (`type = 'downloads'`)**: Retorna dinámicamente el slug activo configurado en `DownloadSetting` (ej. `/descargas`).
+6. **URL Personalizada (`url`)**: Retorna la URL personalizada configurada.
 
 ## Caché y Rendimiento
 - Los menús públicos y la colección completa de menús activos se almacenan en caché de memoria Redis (`menu_header`, `menu_sidebar`, `menus_activos_con_items`).

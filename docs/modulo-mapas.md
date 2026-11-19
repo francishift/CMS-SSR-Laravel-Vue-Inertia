@@ -83,7 +83,7 @@ El inspector ofrece controles milimétricos de estilo en la pestaña **Color & E
    - `ElementMap.vue` comprueba `typeof window !== 'undefined'` y `isMounted` para prevenir fallos durante el renderizado en Node.js.
 3. **Cifrado de Credenciales**:
    - La Google Maps API Key se almacena cifrada en la base de datos con AES-256 (`'encrypted'` cast en `SiteSetting.php`).
-   - Se valida en `UpdateSiteSettingRequest.php` y se comparte vía `HandleInertiaRequests.php` a la aplicación.
+   - Se valida en `UpdateSiteSettingRequest.php`; `HandleInertiaRequests.php` únicamente expone en rutas públicas el indicador booleano `has_google_maps_key`, mientras que `ElementMap.vue` obtiene la clave bajo demanda a través del endpoint protegido `GET /api/cms/maps-key` (`GoogleMapsKeyController`).
 4. **Optimización de InfoWindow de Google Maps**:
    - Eliminación del espacio superior fantasma (`.gm-style-iw-chr`) que Google Maps reserva por defecto para la cabecera, reubicando el botón de cierre en posición flotante y aplicando esquinas redondeadas y tipografía moderna integrada con el sistema de diseño.
 

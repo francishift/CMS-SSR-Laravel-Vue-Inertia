@@ -28,7 +28,7 @@ vite build && vite build --ssr && php artisan inertia:stop-ssr && php artisan ca
 
 - **Ocultación de Rutas Privadas**: `HandleInertiaRequests` inyecta las rutas `ziggy` únicamente si la URL pertenece al panel privado (`/panel*`). La web pública recibe `ziggy: null`.
 - **Protección de Datos de Usuario y Anti-Scraping de Contacto**: `auth.user` se entrega a `null` en rutas públicas y `siteSettings` omite los valores crudos `whatsapp_phone`, `whatsapp_message`, `contact_email`, `contact_phone` y `google_maps_api_key`, exponiendo únicamente indicadores booleanos (`has_whatsapp`, `has_contact_email`, `has_contact_phone`, `has_google_maps_key`).
-- **Eliminación de Payloads Duplicados en Plantillas del Builder**: En categorías y artículos renderizados mediante una plantilla activa del Page Builder (`PublicPageController`), se evita serializar por duplicado la colección `articulos` de la vista clásica o el `body` HTML completo cuando la plantilla ya resuelve sus propios bloques, reduciendo a la mitad el tamaño de `data-page` en listados extensos.
+- **Eliminación de Payloads y Diferidos Duplicados en Plantillas del Builder**: En categorías y artículos renderizados mediante una plantilla activa del Page Builder (`PublicPageController`), se evita serializar por duplicado la colección `articulos` de la vista clásica, el `body` HTML completo y las recargas diferidas `Inertia::defer` (`relacionados` y `navegacion` clásicas) cuando la plantilla ya resuelve sus propios bloques, protegiendo además `incrementarVistas()` frente a peticiones parciales (`X-Inertia-Partial-Data`) y reduciendo a la mitad el tamaño de `data-page`.
 - **Resource de Artículos y Layout Livianos**: Los listados públicos (`PageBuilderResolverService` y `ArticleResource`) excluyen `body` en la consulta SQL, omiten `category.extra_fields_schema` repetido en cada tarjeta y descartan metadatos exclusivos de edición (`admin_label` y campos de código vacíos) en `layout_json`.
 - **Separación de Bundle JS Público vs Administración (`resources/js/app.js`)**: En rutas públicas (`Public/*` y `Error`), Vue se hidrata directamente sin descargar ni ejecutar `PrimeVue`, el preset `@primevue/themes/aura` ni `ZiggyVue` (~190 KB menos de JS en el arranque), cargándolos dinámicamente solo en `/panel*`, `/acceso` y vistas previas del maquetador.
 
@@ -65,8 +65,9 @@ Cuando el elemento LCP es un fondo CSS (`.builder-bg-layer`), el navegador no pu
   - En smartphones móviles (`< 768px`), el preload descarga la variante de `w=768` con prioridad `High`. Cuando el motor CSS aplica `var(--bg-url-mob)`, la imagen ya está en caché con prioridad alta.
   - Se eliminan las dobles descargas y se superan las tres comprobaciones de la auditoría `lcp-discovery`.
 
-### 4.3. Caché Inmutable de Variantes WebP (`ImageController`)
-- Endpoint `/media/render` con cabecera `Cache-Control: public, max-age=31536000, immutable` y `X-Image-Cache: HIT (Disk Cache)`.
+### 4.3. Caché Inmutable y Entrega Stateless de Variantes WebP (`ImageController`)
+- Endpoint `GET /media/render` registrado con `->withoutMiddleware('web')` (`routes/web.php`), operando de forma *stateless* sin bloqueo de sesión (`StartSession`), sin `HandleInertiaRequests` y sin consultas de usuario (`VerificarUsuarioActivo`) para atender decenas de imágenes en paralelo con latencia mínima.
+- Emite cabeceras `Cache-Control: public, max-age=31536000, immutable` y `X-Image-Cache: HIT (Disk Cache)`.
 - Compresión WebP al 85% de calidad (82% en móvil), reduciendo el peso de la imagen de fondo entre un 91% y un 98% sin pérdida perceptible de calidad visual.
 ### 4.4. Estrategia de `preconnect` / `dns-prefetch` Condicional
 

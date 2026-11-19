@@ -2,7 +2,7 @@
 
 ## 1. Patrones de Diseño y Principios SOLID
 
-La aplicación **CMS Base de Usuarios** está diseñada siguiendo una arquitectura limpia (Clean Architecture), altamente cohesiva y de bajo acoplamiento:
+La aplicación **CMS SSR** está diseñada siguiendo una arquitectura limpia (Clean Architecture), altamente cohesiva y de bajo acoplamiento:
 
 ### 1.1 Single Responsibility Principle (SRP)
 - **Controllers Delgados (`Thin Controllers`)**: Los controladores en `app/Http/Controllers/` se limitan a orquestar las peticiones HTTP y retornar respuestas Inertia. Ninguna lógica de persistencia ni reglas de negocio reside en los controladores.

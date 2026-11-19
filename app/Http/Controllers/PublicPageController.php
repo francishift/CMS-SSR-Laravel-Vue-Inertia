@@ -324,8 +324,10 @@ class PublicPageController extends Controller
         $settings = SiteSetting::cached();
         $this->seoService->configurarArticulo($article, $settings->site_name, $breadcrumb);
 
-        // Incrementar vistas de forma atómica
-        $article->incrementarVistas();
+        // Incrementar vistas de forma atómica únicamente en la carga principal (evitar duplicar en recargas parciales defer)
+        if (!$request->hasHeader('X-Inertia-Partial-Data')) {
+            $article->incrementarVistas();
+        }
 
         // Comprobar jerarquía de plantillas del Builder (1. Artículo -> 2. Categoría)
         $articleTemplate = $article->articleBuilderTemplate;
@@ -340,16 +342,22 @@ class PublicPageController extends Controller
             );
         }
 
+        $usaPlantillaBuilder = !empty($article->layout_json['sections']);
+
         return Inertia::render('Public/Article', [
             // Datos inmediatos — críticos para SEO (SSR los renderiza en el HTML inicial)
             'articulo'     => new ArticleResource($article),
             'breadcrumb'   => $breadcrumb,
 
-            // Datos diferidos — NO críticos para SEO, se cargan tras el render inicial
-            'relacionados' => Inertia::defer(fn () => ArticleResource::collection(
-                $this->articleService->relacionados($article)
-            )),
-            'navegacion'   => Inertia::defer(fn () => $this->articleService->obtenerNavegacionAnteriorYSiguiente($article, $category)),
+            // Datos diferidos — solo necesarios en la vista clásica (las plantillas del Builder ya resuelven su navegación y grids internamente)
+            'relacionados' => $usaPlantillaBuilder
+                ? ['data' => []]
+                : Inertia::defer(fn () => ArticleResource::collection(
+                    $this->articleService->relacionados($article)
+                )),
+            'navegacion'   => $usaPlantillaBuilder
+                ? ['anterior' => null, 'siguiente' => null]
+                : Inertia::defer(fn () => $this->articleService->obtenerNavegacionAnteriorYSiguiente($article, $category)),
         ]);
     }
 
